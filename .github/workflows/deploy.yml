@@ -135,7 +135,7 @@ jobs:
             
             # Создание docker-compose.prod.yml
             echo "📝 Creating docker-compose.prod.yml..."
-            cat > docker-compose.prod.yml << 'COMPOSE_EOF'
+            cat > docker-compose.prod.yml <<- 'COMPOSE_EOF'
 version: '3.8'
 
 services:
@@ -199,7 +199,7 @@ COMPOSE_EOF
             
             # Создание .env файла из секретов GitHub
             echo "⚙️ Creating environment file..."
-            cat > .env.production << EOL
+            cat > .env.production <<- EOL
 NODE_ENV=production
 
 # Database (внешняя БД)
@@ -242,7 +242,7 @@ EOL
             
             # Создание nginx.conf
             echo "📝 Creating nginx.conf..."
-            cat > nginx/nginx.conf << 'NGINX_EOF'
+            cat > nginx/nginx.conf <<- 'NGINX_EOF'
 worker_processes auto;
 error_log /var/log/nginx/error.log warn;
 pid /var/run/nginx.pid;
