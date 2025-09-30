@@ -1,8 +1,8 @@
 # Multi-stage build для оптимизации размера образа
-FROM node:18-alpine AS base
+FROM node:18-slim AS base
 
 # Установка зависимостей для сборки + OpenSSL для Prisma
-RUN apk add --no-cache libc6-compat openssl1.1-compat
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Создание рабочей директории
 WORKDIR /app
@@ -18,14 +18,14 @@ RUN npm ci && npm cache clean --force
 RUN npx prisma generate
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:18-slim AS production
 
 # Установка OpenSSL для Prisma
-RUN apk add --no-cache openssl1.1-compat
+RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Создание пользователя для безопасности
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 crm
+RUN groupadd --system --gid 1001 nodejs
+RUN useradd --system --uid 1001 --gid nodejs crm
 
 # Установка рабочей директории
 WORKDIR /app
