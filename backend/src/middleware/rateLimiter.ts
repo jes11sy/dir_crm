@@ -25,8 +25,9 @@ interface RateLimitOptions {
 
 interface RateLimitInfo {
   limit: number
+  current: number
   remaining: number
-  reset: number
+  resetTime: Date
 }
 
 export function createRateLimiter(options: RateLimitOptions) {
@@ -106,8 +107,9 @@ export function createRateLimiter(options: RateLimitOptions) {
       // Сохраняем информацию о лимите в запросе для дальнейшего использования
       req.rateLimit = {
         limit: max,
+        current: max - remaining,
         remaining,
-        reset: resetTime
+        resetTime: resetTime
       }
 
       next()
