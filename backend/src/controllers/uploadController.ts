@@ -60,7 +60,7 @@ export const uploadDocument = async (req: Request, res: Response) => {
     console.error('❌ Ошибка загрузки файла в S3:', error)
     res.status(500).json({ 
       message: 'Ошибка загрузки файла', 
-      error: error.message 
+      error: (error as Error).message 
     })
   }
 }
@@ -81,7 +81,7 @@ export const deleteDocument = async (req: Request, res: Response) => {
     console.error('❌ Ошибка удаления файла из S3:', error)
     res.status(500).json({ 
       message: 'Ошибка удаления файла',
-      error: error.message 
+      error: (error as Error).message 
     })
   }
 }

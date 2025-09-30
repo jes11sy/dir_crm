@@ -192,7 +192,7 @@ export function healthCheck(req: Request, res: Response) {
 const activeSessions = new Map<string, { lastActivity: Date; userId?: number }>();
 
 export function trackActiveUsers(req: Request, res: Response, next: NextFunction) {
-  const sessionId = req.sessionID || req.ip;
+  const sessionId = (req as any).sessionID || req.ip;
   const userId = (req as any).user?.id;
 
   activeSessions.set(sessionId, {

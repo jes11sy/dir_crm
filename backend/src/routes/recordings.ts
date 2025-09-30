@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { s3Client, checkFileExists } from '../services/s3';
+import '../types'; // Импортируем расширения типов
 
 const router = Router();
 
@@ -124,8 +125,8 @@ router.get('/*', authenticateAudio, async (req: Request, res: Response) => {
 
     res.on('close', () => {
       console.log('🔌 Соединение закрыто клиентом');
-      if (stream.destroy) {
-        stream.destroy();
+      if (stream && typeof (stream as any).destroy === 'function') {
+        (stream as any).destroy();
       }
     });
 

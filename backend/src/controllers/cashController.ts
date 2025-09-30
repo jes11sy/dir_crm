@@ -142,10 +142,10 @@ export const createCashOperation = async (req: Request, res: Response) => {
     })
   } catch (error) {
     console.error('❌ Ошибка создания операции:', error)
-    console.error('❌ Детали ошибки:', error.message)
+    console.error('❌ Детали ошибки:', (error as Error).message)
     res.status(500).json({ 
       message: 'Внутренняя ошибка сервера',
-      error: error.message 
+      error: (error as Error).message 
     })
   }
 }
@@ -241,8 +241,8 @@ export const getCashStats = async (req: Request, res: Response) => {
       })
     ])
 
-    const totalIncome = income._sum.amount || 0
-    const totalExpenses = expenses._sum.amount || 0
+    const totalIncome = Number(income._sum.amount) || 0
+    const totalExpenses = Number(expenses._sum.amount) || 0
     const netIncome = totalIncome - totalExpenses
 
     res.json({

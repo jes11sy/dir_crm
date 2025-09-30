@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import Redis from 'ioredis'
+import '../types' // Импортируем расширения типов
 
 // Создаем подключение к Redis только в продакшене
 const isProduction = process.env.NODE_ENV === 'production'
@@ -10,7 +11,6 @@ if (isProduction) {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
     password: process.env.REDIS_PASSWORD,
-    retryDelayOnFailover: 100,
     maxRetriesPerRequest: 3,
   })
 }

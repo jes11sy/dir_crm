@@ -1,111 +1,41 @@
-import winston from 'winston';
-import path from 'path';
+// Простой логгер без внешних зависимостей
+class SimpleLogger {
+  private getTimestamp(): string {
+    return new Date().toISOString();
+  }
 
-// Определяем уровни логирования
-const levels = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  http: 3,
-  debug: 4,
-};
+  private formatMessage(level: string, message: string, data?: any): string {
+    const timestamp = this.getTimestamp();
+    const dataStr = data ? ` ${JSON.stringify(data)}` : '';
+    return `${timestamp} [${level.toUpperCase()}]: ${message}${dataStr}`;
+  }
 
-// Цвета для разных уровней
-const colors = {
-  error: 'red',
-  warn: 'yellow',
-  info: 'green',
-  http: 'magenta',
-  debug: 'white',
-};
+  info(message: string, data?: any): void {
+    console.log(this.formatMessage('info', message, data));
+  }
 
-winston.addColors(colors);
+  warn(message: string, data?: any): void {
+    console.warn(this.formatMessage('warn', message, data));
+  }
 
-// Определяем уровень логирования в зависимости от окружения
-const level = () => {
-  const env = process.env.NODE_ENV || 'development';
-  const isDevelopment = env === 'development';
-  return isDevelopment ? 'debug' : 'warn';
-};
+  error(message: string, data?: any): void {
+    console.error(this.formatMessage('error', message, data));
+  }
 
-// Форматы для разных транспортов
-const consoleFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`,
-  ),
-);
+  debug(message: string, data?: any): void {
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(this.formatMessage('debug', message, data));
+    }
+  }
 
-const fileFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.errors({ stack: true }),
-  winston.format.json(),
-);
-
-// Создаем транспорты
-const transports = [
-  // Console transport для development
-  new winston.transports.Console({
-    format: consoleFormat,
-  }),
-];
-
-// File transports для production
-if (process.env.NODE_ENV === 'production') {
-  const logDir = process.env.LOG_FILE_PATH ? path.dirname(process.env.LOG_FILE_PATH) : '/var/log/crm';
-  
-  transports.push(
-    // Общий лог файл
-    new winston.transports.File({
-      filename: path.join(logDir, 'app.log'),
-      format: fileFormat,
-      maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 5,
-    }),
-    
-    // Отдельный файл для ошибок
-    new winston.transports.File({
-      filename: path.join(logDir, 'error.log'),
-      level: 'error',
-      format: fileFormat,
-      maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 5,
-    }),
-    
-    // HTTP запросы
-    new winston.transports.File({
-      filename: path.join(logDir, 'http.log'),
-      level: 'http',
-      format: fileFormat,
-      maxsize: 10 * 1024 * 1024, // 10MB
-      maxFiles: 3,
-    }),
-  );
+  http(message: string, data?: any): void {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(this.formatMessage('http', message, data));
+    }
+  }
 }
 
-// Создаем основной логгер
-const logger = winston.createLogger({
-  level: level(),
-  levels,
-  transports,
-  // Обработка необработанных исключений
-  exceptionHandlers: [
-    new winston.transports.File({
-      filename: process.env.NODE_ENV === 'production' 
-        ? '/var/log/crm/exceptions.log' 
-        : './logs/exceptions.log'
-    })
-  ],
-  // Обработка необработанных промисов
-  rejectionHandlers: [
-    new winston.transports.File({
-      filename: process.env.NODE_ENV === 'production' 
-        ? '/var/log/crm/rejections.log' 
-        : './logs/rejections.log'
-    })
-  ],
-});
+const logger = new SimpleLogger();
 
 // Middleware для логирования HTTP запросов
 export const httpLogger = (req: any, res: any, next: any) => {

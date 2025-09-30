@@ -193,13 +193,13 @@ export const updateMaster = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('❌ Ошибка обновления мастера:', error)
     console.error('Детали ошибки:', {
-      message: error.message,
-      code: error.code,
-      meta: error.meta
+      message: (error as any).message,
+      code: (error as any).code,
+      meta: (error as any).meta
     })
     res.status(500).json({ 
       message: 'Внутренняя ошибка сервера',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
     })
   }
 }
@@ -262,9 +262,9 @@ export const getMasterStats = async (req: Request, res: Response) => {
 
     const completedOrders = master.orders
     const totalOrders = completedOrders.length
-    const totalRevenue = completedOrders.reduce((sum, order) => sum + (order.result || 0), 0)
-    const totalExpenditure = completedOrders.reduce((sum, order) => sum + (order.expenditure || 0), 0)
-    const totalClean = completedOrders.reduce((sum, order) => sum + (order.clean || 0), 0)
+    const totalRevenue = completedOrders.reduce((sum, order) => sum + Number(order.result || 0), 0)
+    const totalExpenditure = completedOrders.reduce((sum, order) => sum + Number(order.expenditure || 0), 0)
+    const totalClean = completedOrders.reduce((sum, order) => sum + Number(order.clean || 0), 0)
     const averageCheck = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
     res.json({
@@ -272,7 +272,7 @@ export const getMasterStats = async (req: Request, res: Response) => {
         id: master.id,
         name: master.name,
         cities: master.cities,
-        status_work: master.status_work
+        statusWork: master.statusWork
       },
       stats: {
         totalOrders,

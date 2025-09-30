@@ -133,8 +133,7 @@ export const getOrderById = async (req: Request, res: Response) => {
         operator: {
           select: {
             id: true,
-            name: true,
-            cities: true
+            name: true
           }
         }
       }
@@ -243,7 +242,7 @@ export const updateOrder = async (req: Request, res: Response) => {
     if (filteredData.statusOrder === 'Готово' && 
         currentOrder.statusOrder !== 'Готово' && 
         order.result && 
-        order.result > 0) {
+        Number(order.result) > 0) {
       
       try {
         const masterName = order.master ? order.master.name : 'Неизвестный мастер'
@@ -353,7 +352,7 @@ export const closeOrder = async (req: Request, res: Response) => {
     })
 
     // Создаем приход при закрытии заказа
-    if (order.result && order.result > 0) {
+    if (order.result && Number(order.result) > 0) {
       try {
         const masterName = order.master ? order.master.name : 'Неизвестный мастер'
         const noteText = `${masterName} - Итог по заказу: ${order.result}₽`
