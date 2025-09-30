@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
   
   // Экспериментальные функции для производительности
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Отключено из-за проблем с critters в Docker
     optimizePackageImports: ['lucide-react', 'date-fns'],
   },
   
