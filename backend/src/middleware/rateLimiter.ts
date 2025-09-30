@@ -73,17 +73,18 @@ export function createRateLimiter(options: RateLimitOptions) {
 
       // Проверяем лимит
       if (currentRequests >= max) {
-        const resetTime = now + windowMs
+        const resetTime = new Date(now + windowMs)
         const rateLimitInfo: RateLimitInfo = {
           limit: max,
+          current: max,
           remaining: 0,
-          reset: resetTime
+          resetTime: resetTime
         }
 
         res.set({
           'X-RateLimit-Limit': max.toString(),
           'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': resetTime.toString(),
+          'X-RateLimit-Reset': resetTime.getTime().toString(),
           'Retry-After': Math.ceil(windowMs / 1000).toString()
         })
 
@@ -96,12 +97,12 @@ export function createRateLimiter(options: RateLimitOptions) {
 
       // Устанавливаем заголовки с информацией о лимите
       const remaining = max - currentRequests - 1
-      const resetTime = now + windowMs
+      const resetTime = new Date(now + windowMs)
 
       res.set({
         'X-RateLimit-Limit': max.toString(),
         'X-RateLimit-Remaining': remaining.toString(),
-        'X-RateLimit-Reset': resetTime.toString()
+        'X-RateLimit-Reset': resetTime.getTime().toString()
       })
 
       // Сохраняем информацию о лимите в запросе для дальнейшего использования
