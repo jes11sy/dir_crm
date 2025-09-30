@@ -11,8 +11,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Установка зависимостей
-RUN npm ci --only=production && npm cache clean --force
+# Установка всех зависимостей (включая dev для сборки)
+RUN npm ci && npm cache clean --force
 
 # Генерация Prisma клиента
 RUN npx prisma generate
@@ -36,6 +36,9 @@ COPY --chown=crm:nodejs . .
 
 # Компиляция TypeScript
 RUN npm run build
+
+# Удаление dev зависимостей после сборки
+RUN npm prune --production
 
 # Создание директорий для логов и uploads
 RUN mkdir -p /var/log/crm /app/uploads && \
