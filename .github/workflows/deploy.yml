@@ -110,6 +110,7 @@ jobs:
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /opt/crm-system/nginx/ssl /opt/crm-system/logs /opt/crm-system/backups /opt/crm-system/uploads"
           scp docker-compose.prod.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/crm-system/
           scp nginx/nginx.conf.template ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/crm-system/nginx/nginx.conf
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cp /etc/letsencrypt/live/lead-schem.ru/fullchain.pem /opt/crm-system/nginx/ssl/ && cp /etc/letsencrypt/live/lead-schem.ru/privkey.pem /opt/crm-system/nginx/ssl/"
 
       - name: 🚀 Deploy to production server
         env:
@@ -174,8 +175,8 @@ jobs:
               echo "JWT_SECRET=$JWT_SECRET"
               echo "PORT=3002"
               echo "FRONTEND_URL=https://lead-schem.ru"
-              echo "REDIS_URL=$REDIS_URL"
-              echo "REDIS_PASSWORD=$REDIS_PASSWORD"
+              echo "REDIS_URL=redis://:defaultpassword@redis:6379"
+              echo "REDIS_PASSWORD=defaultpassword"
               echo "S3_ENDPOINT=$S3_ENDPOINT"
               echo "S3_REGION=$S3_REGION"
               echo "S3_BUCKET=$S3_BUCKET"
