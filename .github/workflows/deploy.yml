@@ -110,7 +110,7 @@ jobs:
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "mkdir -p /opt/crm-system/nginx/ssl /opt/crm-system/logs /opt/crm-system/backups /opt/crm-system/uploads"
           scp docker-compose.prod.yml ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/crm-system/
           scp nginx/nginx.conf.template ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/opt/crm-system/nginx/nginx.conf
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cp /etc/letsencrypt/live/lead-schem.ru/fullchain.pem /opt/crm-system/nginx/ssl/ && cp /etc/letsencrypt/live/lead-schem.ru/privkey.pem /opt/crm-system/nginx/ssl/"
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cp /etc/letsencrypt/live/lead-schem.ru/fullchain.pem /opt/crm-system/nginx/ssl/ && cp /etc/letsencrypt/live/lead-schem.ru/privkey.pem /opt/crm-system/nginx/ssl/ && chmod 644 /opt/crm-system/nginx/ssl/fullchain.pem && chmod 600 /opt/crm-system/nginx/ssl/privkey.pem && ls -la /opt/crm-system/nginx/ssl/"
 
       - name: 🚀 Deploy to production server
         env:
@@ -259,6 +259,12 @@ jobs:
               echo "⚠️ Frontend not responding yet (will start shortly)"
               docker compose -f docker-compose.prod.yml logs frontend --tail 20
             fi
+            
+            # Перезагрузка nginx для применения новых сертификатов
+            echo "🔄 Reloading nginx..."
+            docker compose -f docker-compose.prod.yml restart nginx
+            sleep 5
+            echo "✅ Nginx reloaded"
             
             # Очистка старых образов
             echo "🧹 Cleaning up old images..."
