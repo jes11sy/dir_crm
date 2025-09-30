@@ -174,7 +174,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: crm-redis
-    command: redis-server --requirepass \${REDIS_PASSWORD}
+    command: redis-server --requirepass $${REDIS_PASSWORD}
     ports:
       - "6379:6379"
     volumes:
@@ -193,15 +193,15 @@ services:
     container_name: crm-postgres
     environment:
       - POSTGRES_DB=crm
-      - POSTGRES_USER=\${DB_USER}
-      - POSTGRES_PASSWORD=\${DB_PASSWORD}
+      - POSTGRES_USER=$${DB_USER}
+      - POSTGRES_PASSWORD=$${DB_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - crm-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \${DB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U $${DB_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -282,9 +282,9 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
     
-    log_format main '\$remote_addr - \$remote_user [\$time_local] "\$request" '
-                    '\$status \$body_bytes_sent "\$http_referer" '
-                    '"\$http_user_agent" "\$http_x_forwarded_for"';
+    log_format main '$$remote_addr - $$remote_user [$$time_local] "$$request" '
+                    '$$status $$body_bytes_sent "$$http_referer" '
+                    '"$$http_user_agent" "$$http_x_forwarded_for"';
     
     access_log /var/log/nginx/access.log main;
     
@@ -297,7 +297,7 @@ http {
     server {
         listen 80;
         server_name lead-schem.ru www.lead-schem.ru;
-        return 301 https://\$server_name\$request_uri;
+        return 301 https://$$server_name$$request_uri;
     }
     
     server {
@@ -310,10 +310,10 @@ http {
         location / {
             proxy_pass http://frontend:3000;
             proxy_http_version 1.1;
-            proxy_set_header Upgrade \$http_upgrade;
+            proxy_set_header Upgrade $$http_upgrade;
             proxy_set_header Connection 'upgrade';
-            proxy_set_header Host \$host;
-            proxy_cache_bypass \$http_upgrade;
+            proxy_set_header Host $$host;
+            proxy_cache_bypass $$http_upgrade;
         }
     }
     
@@ -321,7 +321,7 @@ http {
     server {
         listen 80;
         server_name api.lead-schem.ru;
-        return 301 https://\$server_name\$request_uri;
+        return 301 https://$$server_name$$request_uri;
     }
     
     server {
@@ -334,13 +334,13 @@ http {
         location / {
             proxy_pass http://backend:3002;
             proxy_http_version 1.1;
-            proxy_set_header Upgrade \$http_upgrade;
+            proxy_set_header Upgrade $$http_upgrade;
             proxy_set_header Connection 'upgrade';
-            proxy_set_header Host \$host;
-            proxy_cache_bypass \$http_upgrade;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
+            proxy_set_header Host $$host;
+            proxy_cache_bypass $$http_upgrade;
+            proxy_set_header X-Real-IP $$remote_addr;
+            proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $$scheme;
         }
     }
 }
