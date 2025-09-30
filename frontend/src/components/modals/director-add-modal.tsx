@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label"
 import { FormField, FormSummary } from "@/components/ui/form-validation"
 import { Loader2, Plus, X } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface DirectorFormData {
   name: string
@@ -111,7 +112,7 @@ export function DirectorAddModal({ isOpen, onClose, onSuccess }: DirectorAddModa
     try {
       const token = localStorage.getItem('adminToken')
       
-      const response = await fetch('http://localhost:3002/api/admin/directors', {
+      const response = await fetch('${config.apiUrl}/api/admin/directors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Users, Plus, Search, Shield, Edit, Trash2 } from "lucide-react"
 import { formatDateForDisplay } from "@/lib/utils"
+import { config } from "@/lib/config"
 
 interface AdminUser {
   id: number
@@ -50,7 +51,7 @@ export default function AdminDirectorsPage() {
       }
 
       try {
-        const response = await fetch('http://localhost:3002/api/admin/auth/verify', {
+        const response = await fetch('${config.apiUrl}/api/admin/auth/verify', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -88,7 +89,7 @@ export default function AdminDirectorsPage() {
     try {
       const token = localStorage.getItem('adminToken')
       
-      const response = await fetch('http://localhost:3002/api/admin/directors', {
+      const response = await fetch('${config.apiUrl}/api/admin/directors', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

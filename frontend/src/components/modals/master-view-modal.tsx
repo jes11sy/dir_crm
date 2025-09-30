@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
+import { config } from "@/lib/config"
   MapPin,
   Calendar,
   User,
@@ -193,7 +194,7 @@ export function MasterViewModal({ master, isOpen, onClose, onEdit, onDelete }: M
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-green-600">Загружен</span>
                       <a 
-                        href={master.passportDoc.startsWith('http') ? master.passportDoc : `http://localhost:3002/uploads/documents/${master.passportDoc}`}
+                        href={master.passportDoc.startsWith('http') ? master.passportDoc : `${config.apiUrl}/uploads/documents/${master.passportDoc}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800 text-sm underline"
@@ -215,7 +216,7 @@ export function MasterViewModal({ master, isOpen, onClose, onEdit, onDelete }: M
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-green-600">Загружен</span>
                       <a 
-                        href={master.contractDoc.startsWith('http') ? master.contractDoc : `http://localhost:3002/uploads/documents/${master.contractDoc}`}
+                        href={master.contractDoc.startsWith('http') ? master.contractDoc : `${config.apiUrl}/uploads/documents/${master.contractDoc}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800 text-sm underline"

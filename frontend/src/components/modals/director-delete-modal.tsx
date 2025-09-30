@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Loader2, Trash2, AlertTriangle } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface Director {
   id: number
@@ -32,7 +33,7 @@ export function DirectorDeleteModal({ isOpen, director, onClose, onSuccess }: Di
     try {
       const token = localStorage.getItem('adminToken')
       
-      const response = await fetch(`http://localhost:3002/api/admin/directors/${director.id}`, {
+      const response = await fetch(`${config.apiUrl}/api/admin/directors/${director.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

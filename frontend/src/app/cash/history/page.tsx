@@ -7,6 +7,7 @@ import { CashHistoryTable } from "@/components/tables/cash-history-table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Download, History, Banknote, TrendingUp, TrendingDown } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface CashOperation {
   id: number
@@ -28,7 +29,7 @@ export default function CashHistoryPage() {
   const loadOperations = async () => {
     try {
       console.log('🔄 Загружаем историю операций...')
-      const response = await fetch('http://localhost:3002/api/cash?type=all', {
+      const response = await fetch('${config.apiUrl}/api/cash?type=all', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

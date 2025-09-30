@@ -56,7 +56,7 @@ export default function MasterHistoryPage() {
       console.log('🔄 Загружаем данные мастера...')
       
       // Загружаем данные мастера
-      const masterResponse = await fetch(`http://localhost:3002/api/masters/${masterId}`, {
+      const masterResponse = await fetch(`${config.apiUrl}/api/masters/${masterId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

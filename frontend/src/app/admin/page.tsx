@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Shield, Users, Settings, Database, Activity } from "lucide-react"
 import { AdminHeader } from "@/components/layout/admin-header"
+import { config } from "@/lib/config"
 
 interface AdminUser {
   id: number
@@ -29,7 +30,7 @@ export default function AdminDashboard() {
       }
 
       try {
-        const response = await fetch('http://localhost:3002/api/admin/auth/verify', {
+        const response = await fetch('${config.apiUrl}/api/admin/auth/verify', {
           headers: {
             'Authorization': `Bearer ${token}`
           }

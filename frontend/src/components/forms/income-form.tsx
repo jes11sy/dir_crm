@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Save, X, Upload, FileText, Image, Trash2, CheckCircle } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface IncomeFormData {
   city: string
@@ -97,7 +98,7 @@ export function IncomeForm({ isOpen, onClose, onSubmit, loading = false, directo
         uploadFormData.append('document', receiptFile)
         uploadFormData.append('folder', 'director/cash/receipt_doc')
 
-        const uploadResponse = await fetch('http://localhost:3002/api/upload', {
+        const uploadResponse = await fetch('${config.apiUrl}/api/upload', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`

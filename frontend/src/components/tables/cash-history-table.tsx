@@ -30,6 +30,7 @@ import {
 } from "lucide-react"
 import { LoadingOverlay, TableLoadingSkeleton } from "@/components/ui/loading-spinner"
 import { ErrorMessage } from "@/components/ui/error-boundary"
+import { config } from "@/lib/config"
 
 interface CashOperation {
   id: number
@@ -290,7 +291,7 @@ export function CashHistoryTable({ operations, isLoading = false, error }: CashH
                     <div className="flex items-center space-x-1 text-blue-600">
                       <FileText className="w-3 h-3" />
                       <a 
-                        href={operation.receiptDoc.startsWith('http') ? operation.receiptDoc : `http://localhost:3002/uploads/documents/${operation.receiptDoc}`}
+                        href={operation.receiptDoc.startsWith('http') ? operation.receiptDoc : `${config.apiUrl}/uploads/documents/${operation.receiptDoc}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs underline"

@@ -8,6 +8,7 @@ import OrderEditModal from "@/components/modals/order-edit-modal"
 import { OrderViewModal } from "@/components/modals/order-view-modal"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface Order {
   id: number
@@ -88,7 +89,7 @@ export default function OrdersPage() {
       if (filters.city !== 'all') params.append('city', filters.city)
       if (filters.master !== 'all') params.append('master', filters.master)
       
-      const response = await fetch(`http://localhost:3002/api/orders?${params.toString()}`, {
+      const response = await fetch(`${config.apiUrl}/api/orders?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +159,7 @@ export default function OrdersPage() {
   const loadMasters = async () => {
     try {
       console.log('🔄 Загружаем мастеров...')
-      const response = await fetch('http://localhost:3002/api/masters', {
+      const response = await fetch('${config.apiUrl}/api/masters', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -200,7 +201,7 @@ export default function OrdersPage() {
   const loadFilterOptions = async () => {
     try {
       console.log('🔄 Загружаем опции фильтров...')
-      const response = await fetch('http://localhost:3002/api/orders/filter-options', {
+      const response = await fetch('${config.apiUrl}/api/orders/filter-options', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -246,7 +247,7 @@ export default function OrdersPage() {
     try {
         console.log("📤 Отправляем данные заказа:", JSON.stringify(updatedOrder, null, 2))
         
-        const response = await fetch(`http://localhost:3002/api/orders/${updatedOrder.id}`, {
+        const response = await fetch(`${config.apiUrl}/api/orders/${updatedOrder.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -8,6 +8,7 @@ import { CashHistoryTable } from "@/components/tables/cash-history-table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus, Download, TrendingUp, Banknote } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface IncomeData {
   id: number
@@ -34,7 +35,7 @@ export default function CashIncomePage() {
 
   const loadDirectorInfo = async () => {
     try {
-      const response = await fetch('http://localhost:3002/api/auth/profile', {
+      const response = await fetch('${config.apiUrl}/api/auth/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -65,7 +66,7 @@ export default function CashIncomePage() {
   const loadIncomes = async () => {
     try {
       console.log('🔄 Загружаем приходы...')
-      const response = await fetch('http://localhost:3002/api/cash?type=приход', {
+      const response = await fetch('${config.apiUrl}/api/cash?type=приход', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -124,7 +125,7 @@ export default function CashIncomePage() {
         ...incomeData
       }
 
-      const response = await fetch('http://localhost:3002/api/cash', {
+      const response = await fetch('${config.apiUrl}/api/cash', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

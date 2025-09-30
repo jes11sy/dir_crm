@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { LoginFormComponent } from "@/components/forms/login-form"
 import { LoginForm } from "@/lib/types"
 import { useAuth } from "@/lib/auth-context"
+import { config } from "@/lib/config"
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -15,7 +16,7 @@ export default function LoginPage() {
     setIsLoading(true)
     
     try {
-      const response = await fetch('http://localhost:3002/api/auth/login', {
+      const response = await fetch(`${config.apiUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

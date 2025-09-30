@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label"
 import { FormField, FormSummary } from "@/components/ui/form-validation"
 import { Loader2, Edit, X } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface Director {
   id: number
@@ -138,7 +139,7 @@ export function DirectorEditModal({ isOpen, director, onClose, onSuccess }: Dire
         updateData.password = formData.password
       }
 
-      const response = await fetch(`http://localhost:3002/api/admin/directors/${director.id}`, {
+      const response = await fetch(`${config.apiUrl}/api/admin/directors/${director.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

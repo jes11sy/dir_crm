@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { AdminLoginFormComponent } from "@/components/forms/admin-login-form"
 import { AdminLoginForm } from "@/lib/types"
+import { config } from "@/lib/config"
 
 export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -13,7 +14,7 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     
     try {
-      const response = await fetch('http://localhost:3002/api/admin/auth/login', {
+      const response = await fetch(`${config.apiUrl}/api/admin/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

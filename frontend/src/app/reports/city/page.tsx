@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MapPin, Calendar } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface CityReport {
   city: string
@@ -68,7 +69,7 @@ export default function ReportsCityPage() {
       console.log('🏙️ Город пользователя:', userCity)
       setUserCity(userCity)
       
-      let apiUrl = `http://localhost:3002/api/reports/city?city=${userCity}`
+      let apiUrl = `${config.apiUrl}/api/reports/city?city=${userCity}`
       
       // Добавляем параметры периода если они заданы
       if (dateFrom) {

@@ -427,7 +427,7 @@ export function OrderViewModal({ order, isOpen, onClose, onEdit, onDelete }: Ord
                               className="hover:bg-blue-50 hover:border-blue-300"
                             >
                               <a 
-                                href={order.bsoDoc.startsWith('http') ? order.bsoDoc : `http://localhost:3002/uploads/documents/${order.bsoDoc}`}
+                                href={order.bsoDoc.startsWith('http') ? order.bsoDoc : `${config.apiUrl}/uploads/documents/${order.bsoDoc}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -475,7 +475,7 @@ export function OrderViewModal({ order, isOpen, onClose, onEdit, onDelete }: Ord
                               className="hover:bg-green-50 hover:border-green-300"
                             >
                               <a 
-                                href={order.expenditureDoc.startsWith('http') ? order.expenditureDoc : `http://localhost:3002/uploads/documents/${order.expenditureDoc}`}
+                                href={order.expenditureDoc.startsWith('http') ? order.expenditureDoc : `${config.apiUrl}/uploads/documents/${order.expenditureDoc}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >

@@ -9,6 +9,7 @@ import { MasterViewModal } from "@/components/modals/master-view-modal"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, Plus, UserCheck, UserX } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface Master {
   id: number
@@ -37,7 +38,7 @@ export default function MastersPage() {
 
   const loadMasters = async () => {
     try {
-      const response = await fetch('http://localhost:3002/api/masters', {
+      const response = await fetch('${config.apiUrl}/api/masters', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +105,7 @@ export default function MastersPage() {
   const handleDeleteMaster = async (masterId: number) => {
     if (confirm("Вы уверены, что хотите удалить этого мастера?")) {
       try {
-        const response = await fetch(`http://localhost:3002/api/masters/${masterId}`, {
+        const response = await fetch(`${config.apiUrl}/api/masters/${masterId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ export default function MastersPage() {
     try {
       if (updatedMaster.id) {
         // Редактирование существующего
-        const response = await fetch(`http://localhost:3002/api/masters/${updatedMaster.id}`, {
+        const response = await fetch(`${config.apiUrl}/api/masters/${updatedMaster.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ export default function MastersPage() {
         console.log("Мастер обновлен:", data.master)
       } else {
         // Добавление нового
-        const response = await fetch('http://localhost:3002/api/masters', {
+        const response = await fetch('${config.apiUrl}/api/masters', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

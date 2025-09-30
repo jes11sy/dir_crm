@@ -7,6 +7,7 @@ import { MastersReportTable } from "@/components/tables/masters-report-table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Users, Download, Calendar, Filter } from "lucide-react"
+import { config } from "@/lib/config"
 
 interface MasterReport {
   id: number
@@ -63,7 +64,7 @@ export default function ReportsMastersPage() {
       console.log('🏙️ Город пользователя:', userCity)
       setUserCity(userCity)
       
-      const response = await fetch(`http://localhost:3002/api/reports/masters?city=${userCity}`, {
+      const response = await fetch(`${config.apiUrl}/api/reports/masters?city=${userCity}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

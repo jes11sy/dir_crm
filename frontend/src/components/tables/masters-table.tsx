@@ -36,6 +36,7 @@ import {
 import { LoadingOverlay, TableLoadingSkeleton } from "@/components/ui/loading-spinner"
 import { ErrorMessage } from "@/components/ui/error-boundary"
 import { formatDateForDisplay } from "@/lib/utils"
+import { config } from "@/lib/config"
 
 interface Master {
   id: number
@@ -299,7 +300,7 @@ export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isL
                     <div className="flex items-center space-x-1 text-blue-600">
                       <FileText className="w-3 h-3" />
                       <a 
-                        href={master.passportDoc.startsWith('http') ? master.passportDoc : `http://localhost:3002/uploads/documents/${master.passportDoc}`}
+                        href={master.passportDoc.startsWith('http') ? master.passportDoc : `${config.apiUrl}/uploads/documents/${master.passportDoc}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs underline"
@@ -316,7 +317,7 @@ export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isL
                     <div className="flex items-center space-x-1 text-green-600">
                       <FileText className="w-3 h-3" />
                       <a 
-                        href={master.contractDoc.startsWith('http') ? master.contractDoc : `http://localhost:3002/uploads/documents/${master.contractDoc}`}
+                        href={master.contractDoc.startsWith('http') ? master.contractDoc : `${config.apiUrl}/uploads/documents/${master.contractDoc}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs underline"

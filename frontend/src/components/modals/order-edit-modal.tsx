@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock, MapPin, Phone, User, FileText, Receipt, Edit, Save, X, Upload, Trash2, CheckCircle, Loader2 } from "lucide-react"
+import { config } from "@/lib/config"
 // Локальный интерфейс Order для модального окна
 interface Order {
   id: number
@@ -181,7 +182,7 @@ export default function OrderEditModal({ order, masters, isOpen, onClose, onSave
 
       formData.append('folder', folderPath)
 
-      const response = await fetch('http://localhost:3002/api/upload', {
+      const response = await fetch('${config.apiUrl}/api/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
