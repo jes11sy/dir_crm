@@ -29,8 +29,8 @@ RUN npm prune --production
 # Production stage
 FROM node:18-alpine AS production
 
-# Установка wget для health checks
-RUN apk add --no-cache wget
+# Установка wget и curl для health checks
+RUN apk add --no-cache wget curl
 
 # Создание пользователя для безопасности
 RUN addgroup --system --gid 1001 nodejs
