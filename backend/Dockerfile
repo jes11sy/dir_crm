@@ -20,8 +20,8 @@ RUN npx prisma generate
 # Production stage
 FROM node:18-slim AS production
 
-# Установка OpenSSL для Prisma
-RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+# Установка OpenSSL для Prisma + wget для health checks
+RUN apt-get update && apt-get install -y openssl ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
 # Создание пользователя для безопасности
 RUN groupadd --system --gid 1001 nodejs
