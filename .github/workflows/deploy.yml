@@ -149,26 +149,26 @@ jobs:
             
             # Создание .env файла из секретов GitHub
             echo "⚙️ Creating environment file..."
-            cat > .env.production << 'ENVEND'
-NODE_ENV=production
-DATABASE_URL=$DATABASE_URL
-JWT_SECRET=$JWT_SECRET
-PORT=3002
-FRONTEND_URL=https://lead-schem.ru
-REDIS_URL=$REDIS_URL
-REDIS_PASSWORD=$REDIS_PASSWORD
-S3_ENDPOINT=$S3_ENDPOINT
-S3_REGION=$S3_REGION
-S3_BUCKET=$S3_BUCKET
-S3_ACCESS_KEY=$S3_ACCESS_KEY
-S3_SECRET_KEY=$S3_SECRET_KEY
-BCRYPT_ROUNDS=12
-SESSION_SECRET=$SESSION_SECRET
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-LOG_LEVEL=info
-LOG_FILE_PATH=/var/log/crm/app.log
-ENVEND
+            {
+              echo "NODE_ENV=production"
+              echo "DATABASE_URL=$DATABASE_URL"
+              echo "JWT_SECRET=$JWT_SECRET"
+              echo "PORT=3002"
+              echo "FRONTEND_URL=https://lead-schem.ru"
+              echo "REDIS_URL=$REDIS_URL"
+              echo "REDIS_PASSWORD=$REDIS_PASSWORD"
+              echo "S3_ENDPOINT=$S3_ENDPOINT"
+              echo "S3_REGION=$S3_REGION"
+              echo "S3_BUCKET=$S3_BUCKET"
+              echo "S3_ACCESS_KEY=$S3_ACCESS_KEY"
+              echo "S3_SECRET_KEY=$S3_SECRET_KEY"
+              echo "BCRYPT_ROUNDS=12"
+              echo "SESSION_SECRET=$SESSION_SECRET"
+              echo "RATE_LIMIT_WINDOW_MS=900000"
+              echo "RATE_LIMIT_MAX_REQUESTS=100"
+              echo "LOG_LEVEL=info"
+              echo "LOG_FILE_PATH=/var/log/crm/app.log"
+            } > .env.production
             
             # Создание SSL сертификатов (самоподписанные для начала)
             if [ ! -f nginx/ssl/cert.pem ]; then
