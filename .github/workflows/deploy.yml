@@ -204,23 +204,23 @@ jobs:
             
             # Применение миграций БД ПОСЛЕ запуска контейнера
             echo "🗄️ Running database migrations..."
-            docker exec crm-backend npx prisma migrate deploy 2>&1 | tee migrate.log || {
-                if grep -q "P3005" migrate.log; then
+            if ! docker exec crm-backend npx prisma migrate deploy 2>&1 | tee /tmp/migrate.log; then
+                if grep -q "P3005" /tmp/migrate.log; then
                   echo "⚠️ Database is not empty, using db push instead..."
                   docker exec crm-backend npx prisma db push --accept-data-loss || {
                     echo "❌ Database sync failed!"
-                    echo "📋 Логи backend:"
-                    docker logs crm-backend --tail 50
                     exit 1
                   }
+                  echo "✅ Database schema synchronized"
                 else
                   echo "❌ Database migration failed!"
-                  echo "📋 Логи backend:"
-                  docker logs crm-backend --tail 50
+                  cat /tmp/migrate.log
                   exit 1
                 fi
-              }
-            rm -f migrate.log
+            else
+              echo "✅ Migrations applied successfully"
+            fi
+            rm -f /tmp/migrate.log
             
             # Ожидание готовности сервисов
             echo "⏳ Waiting for services to be ready..."
