@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Копирование файлов зависимостей
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 # Build stage
 FROM node:18-alpine AS builder
@@ -18,10 +18,13 @@ COPY --from=base /app/node_modules ./node_modules
 COPY . .
 
 # Отключение телеметрии Next.js
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Сборка приложения
 RUN npm run build
+
+# Удаление dev зависимостей после сборки
+RUN npm prune --production
 
 # Production stage
 FROM node:18-alpine AS production
@@ -33,8 +36,8 @@ RUN adduser --system --uid 1001 nextjs
 WORKDIR /app
 
 # Отключение телеметрии Next.js
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
 # Копирование необходимых файлов
 COPY --from=builder /app/public ./public
