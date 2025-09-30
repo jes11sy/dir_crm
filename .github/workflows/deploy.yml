@@ -76,6 +76,12 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=https://api.lead-schem.ru
+            NEXT_PUBLIC_APP_URL=https://lead-schem.ru
+            NEXT_PUBLIC_ENVIRONMENT=production
+            NEXT_PUBLIC_ENABLE_ANALYTICS=true
+            NEXT_PUBLIC_ENABLE_ERROR_REPORTING=true
 
   # Деплой на production сервер
   deploy:
