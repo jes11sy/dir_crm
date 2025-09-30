@@ -2,16 +2,23 @@ import { Request, Response, NextFunction } from 'express'
 import Redis from 'ioredis'
 import '../types' // Импортируем расширения типов
 
-// Создаем подключение к Redis только в продакшене
+// Создаем подключение к Redis только в продакшене и если указан REDIS_URL
 const isProduction = process.env.NODE_ENV === 'production'
 let redis: Redis | null = null
 
-if (isProduction) {
-  redis = new Redis({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
+if (isProduction && process.env.REDIS_URL) {
+  redis = new Redis(process.env.REDIS_URL, {
     password: process.env.REDIS_PASSWORD,
     maxRetriesPerRequest: 3,
+    lazyConnect: true, // Не подключаться сразу, только при первом использовании
+  })
+  
+  redis.on('error', (err) => {
+    console.error('⚠️ Redis error:', err.message)
+  })
+  
+  redis.on('connect', () => {
+    console.log('✅ Redis connected')
   })
 }
 

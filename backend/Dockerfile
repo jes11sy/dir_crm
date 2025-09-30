@@ -1,8 +1,8 @@
 # Multi-stage build для оптимизации размера образа
 FROM node:18-alpine AS base
 
-# Установка зависимостей для сборки
-RUN apk add --no-cache libc6-compat
+# Установка зависимостей для сборки + OpenSSL для Prisma
+RUN apk add --no-cache libc6-compat openssl1.1-compat
 
 # Создание рабочей директории
 WORKDIR /app
@@ -19,6 +19,9 @@ RUN npx prisma generate
 
 # Production stage
 FROM node:18-alpine AS production
+
+# Установка OpenSSL для Prisma
+RUN apk add --no-cache openssl1.1-compat
 
 # Создание пользователя для безопасности
 RUN addgroup --system --gid 1001 nodejs
