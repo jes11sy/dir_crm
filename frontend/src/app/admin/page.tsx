@@ -30,7 +30,7 @@ export default function AdminDashboard() {
       }
 
       try {
-        const response = await fetch('${config.apiUrl}/api/admin/auth/verify', {
+        const response = await fetch(`${config.apiUrl}/api/admin/auth/verify`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

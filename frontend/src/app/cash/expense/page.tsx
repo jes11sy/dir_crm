@@ -35,7 +35,7 @@ export default function CashExpensePage() {
     try {
       // Предполагаем, что в localStorage хранится информация о директоре
       // или делаем запрос на API для получения его городов
-      const response = await fetch('${config.apiUrl}/api/auth/profile', {
+      const response = await fetch(`${config.apiUrl}/api/auth/profile`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -66,7 +66,7 @@ export default function CashExpensePage() {
   const loadExpenses = async () => {
     try {
       console.log('🔄 Загружаем расходы...')
-      const response = await fetch('${config.apiUrl}/api/cash?type=расход', {
+      const response = await fetch(`${config.apiUrl}/api/cash?type=расход`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export default function CashExpensePage() {
 
   const handleSaveExpense = async (expenseData: { amount: number, note: string, nameCreate: string, receiptDoc?: string }) => {
     try {
-      const response = await fetch('${config.apiUrl}/api/cash', {
+      const response = await fetch(`${config.apiUrl}/api/cash`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

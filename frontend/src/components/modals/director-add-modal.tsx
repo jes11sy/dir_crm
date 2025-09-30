@@ -112,7 +112,7 @@ export function DirectorAddModal({ isOpen, onClose, onSuccess }: DirectorAddModa
     try {
       const token = localStorage.getItem('adminToken')
       
-      const response = await fetch('${config.apiUrl}/api/admin/directors', {
+      const response = await fetch(`${config.apiUrl}/api/admin/directors`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

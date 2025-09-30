@@ -159,7 +159,7 @@ export default function OrdersPage() {
   const loadMasters = async () => {
     try {
       console.log('🔄 Загружаем мастеров...')
-      const response = await fetch('${config.apiUrl}/api/masters', {
+      const response = await fetch(`${config.apiUrl}/api/masters`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +201,7 @@ export default function OrdersPage() {
   const loadFilterOptions = async () => {
     try {
       console.log('🔄 Загружаем опции фильтров...')
-      const response = await fetch('${config.apiUrl}/api/orders/filter-options', {
+      const response = await fetch(`${config.apiUrl}/api/orders/filter-options`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

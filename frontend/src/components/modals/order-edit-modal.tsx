@@ -182,7 +182,7 @@ export default function OrderEditModal({ order, masters, isOpen, onClose, onSave
 
       formData.append('folder', folderPath)
 
-      const response = await fetch('${config.apiUrl}/api/upload', {
+      const response = await fetch(`${config.apiUrl}/api/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

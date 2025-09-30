@@ -29,7 +29,7 @@ export default function CashHistoryPage() {
   const loadOperations = async () => {
     try {
       console.log('🔄 Загружаем историю операций...')
-      const response = await fetch('${config.apiUrl}/api/cash?type=all', {
+      const response = await fetch(`${config.apiUrl}/api/cash?type=all`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

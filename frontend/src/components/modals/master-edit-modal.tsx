@@ -72,7 +72,7 @@ export function MasterEditModal({ master, isOpen, onClose, onSave }: MasterEditM
   // Загружаем актуальную информацию о пользователе из API
   const loadCurrentUser = async () => {
     try {
-      const response = await fetch('${config.apiUrl}/api/auth/profile', {
+      const response = await fetch(`${config.apiUrl}/api/auth/profile`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -223,7 +223,7 @@ export function MasterEditModal({ master, isOpen, onClose, onSave }: MasterEditM
       
       formData.append('folder', folderPath)
 
-      const response = await fetch('${config.apiUrl}/api/upload', {
+      const response = await fetch(`${config.apiUrl}/api/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

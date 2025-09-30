@@ -97,7 +97,7 @@ export function ExpenseForm({ isOpen, onClose, onSubmit, loading = false, direct
         uploadFormData.append('document', receiptFile)
         uploadFormData.append('folder', 'director/cash/receipt_doc')
 
-        const uploadResponse = await fetch('${config.apiUrl}/api/upload', {
+        const uploadResponse = await fetch(`${config.apiUrl}/api/upload`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
