@@ -38,7 +38,7 @@ export default function MastersPage() {
 
   const loadMasters = async () => {
     try {
-      const response = await fetch('${config.apiUrl}/api/masters', {
+      const response = await fetch(`${config.apiUrl}/api/masters`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ export default function MastersPage() {
         console.log("Мастер обновлен:", data.master)
       } else {
         // Добавление нового
-        const response = await fetch('${config.apiUrl}/api/masters', {
+        const response = await fetch(`${config.apiUrl}/api/masters`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
