@@ -199,33 +199,33 @@ COMPOSE_EOF
             
             # Создание .env файла из секретов GitHub
             echo "⚙️ Creating environment file..."
-            cat > .env.production << 'EOL'
+            cat > .env.production << EOL
 NODE_ENV=production
 
 # Database (внешняя БД)
-DATABASE_URL=${{ secrets.DATABASE_URL }}
+DATABASE_URL="${{ secrets.DATABASE_URL }}"
 
 # JWT
-JWT_SECRET=${{ secrets.JWT_SECRET }}
+JWT_SECRET="${{ secrets.JWT_SECRET }}"
 
 # Server
 PORT=3002
-FRONTEND_URL=https://lead-schem.ru
+FRONTEND_URL="https://lead-schem.ru"
 
 # Redis (если внешний)
-REDIS_URL=${{ secrets.REDIS_URL }}
-REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+REDIS_URL="${{ secrets.REDIS_URL }}"
+REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
 
 # S3 Storage
-S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
-S3_REGION=${{ secrets.S3_REGION }}
-S3_BUCKET=${{ secrets.S3_BUCKET }}
-S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}
-S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}
+S3_ENDPOINT="${{ secrets.S3_ENDPOINT }}"
+S3_REGION="${{ secrets.S3_REGION }}"
+S3_BUCKET="${{ secrets.S3_BUCKET }}"
+S3_ACCESS_KEY="${{ secrets.S3_ACCESS_KEY }}"
+S3_SECRET_KEY="${{ secrets.S3_SECRET_KEY }}"
 
 # Security
 BCRYPT_ROUNDS=12
-SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+SESSION_SECRET="${{ secrets.SESSION_SECRET }}"
 
 # Rate Limiting
 RATE_LIMIT_WINDOW_MS=900000
