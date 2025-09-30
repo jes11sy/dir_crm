@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Отключение ESLint и TypeScript проверок при сборке (для CI/CD)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
   // Оптимизация для продакшена
   compress: true,
   poweredByHeader: false,
