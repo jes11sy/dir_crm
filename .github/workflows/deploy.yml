@@ -1,0 +1,254 @@
+name: 🚀 Deploy CRM System
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+    types: [ closed ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: ${{ github.repository }}/backend
+  IMAGE_NAME_FRONTEND: ${{ github.repository }}/frontend
+
+jobs:
+  # Сборка и публикация Docker образов
+  build-and-push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔐 Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Extract metadata for Backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 🏷️ Extract metadata for Frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 🔨 Build and push Backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      - name: 🔨 Build and push Frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+
+  # Деплой на production сервер
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    environment: production
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 📋 Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🚀 Deploy to production server
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            set -e
+            
+            echo "🔄 Starting deployment process..."
+            
+            # Переход в директорию проекта
+            cd /opt/crm-system || { echo "❌ Project directory not found"; exit 1; }
+            
+            # Остановка всех сервисов
+            echo "🛑 Stopping services..."
+            docker-compose -f docker-compose.prod.yml down || true
+            
+            # Хард ресет Docker (очистка кэша)
+            echo "🧹 Hard reset Docker cache..."
+            docker system prune -af --volumes
+            docker builder prune -af
+            
+            # Получение последних изменений
+            echo "📥 Pulling latest changes..."
+            git fetch origin
+            git reset --hard origin/main
+            
+            # Создание .env файла из секретов GitHub
+            echo "⚙️ Creating environment file..."
+            cat > .env.production << EOL
+          NODE_ENV=production
+          
+          # Database
+          DATABASE_URL="${{ secrets.DATABASE_URL }}"
+          
+          # JWT
+          JWT_SECRET="${{ secrets.JWT_SECRET }}"
+          
+          # Server
+          PORT=3002
+          FRONTEND_URL="https://lead-schem.ru"
+          
+          # Redis
+          REDIS_URL="${{ secrets.REDIS_URL }}"
+          REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
+          
+          # S3 Storage
+          S3_ENDPOINT="${{ secrets.S3_ENDPOINT }}"
+          S3_REGION="${{ secrets.S3_REGION }}"
+          S3_BUCKET="${{ secrets.S3_BUCKET }}"
+          S3_ACCESS_KEY="${{ secrets.S3_ACCESS_KEY }}"
+          S3_SECRET_KEY="${{ secrets.S3_SECRET_KEY }}"
+          
+          # Security
+          BCRYPT_ROUNDS=12
+          SESSION_SECRET="${{ secrets.SESSION_SECRET }}"
+          
+          # Rate Limiting
+          RATE_LIMIT_WINDOW_MS=900000
+          RATE_LIMIT_MAX_REQUESTS=100
+          
+          # Logging
+          LOG_LEVEL=info
+          LOG_FILE_PATH="/var/log/crm/app.log"
+          EOL
+            
+            # Создание .env для frontend
+            cat > frontend/.env.production << EOL
+          NEXT_PUBLIC_API_URL=https://api.lead-schem.ru
+          NEXT_PUBLIC_APP_URL=https://lead-schem.ru
+          NEXT_PUBLIC_ENVIRONMENT=production
+          NEXT_PUBLIC_ENABLE_ANALYTICS=true
+          NEXT_PUBLIC_ENABLE_ERROR_REPORTING=true
+          EOL
+            
+            # Логин в GitHub Container Registry
+            echo "🔐 Logging into GitHub Container Registry..."
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Обновление docker-compose файла с новыми образами
+            echo "📝 Updating docker-compose with new images..."
+            sed -i 's|image: crm-backend:latest|image: ghcr.io/${{ github.repository }}/backend:latest|g' docker-compose.prod.yml
+            sed -i 's|image: crm-frontend:latest|image: ghcr.io/${{ github.repository }}/frontend:latest|g' docker-compose.prod.yml
+            
+            # Создание необходимых директорий
+            echo "📁 Creating directories..."
+            mkdir -p logs nginx/ssl backups uploads
+            
+            # Создание SSL сертификатов (самоподписанные для начала)
+            if [ ! -f nginx/ssl/cert.pem ]; then
+              echo "🔒 Creating SSL certificates..."
+              openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+                -keyout nginx/ssl/private.key \
+                -out nginx/ssl/cert.pem \
+                -subj "/C=RU/ST=Moscow/L=Moscow/O=CRM/CN=lead-schem.ru"
+            fi
+            
+            # Запуск сервисов
+            echo "▶️ Starting services..."
+            docker-compose -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # Ожидание готовности сервисов
+            echo "⏳ Waiting for services to be ready..."
+            sleep 30
+            
+            # Проверка здоровья сервисов
+            echo "🏥 Health check..."
+            
+            # Проверка backend
+            for i in {1..10}; do
+              if curl -f -s http://localhost:3002/api/health > /dev/null; then
+                echo "✅ Backend is healthy"
+                break
+              fi
+              if [ $i -eq 10 ]; then
+                echo "❌ Backend health check failed"
+                docker-compose -f docker-compose.prod.yml logs backend
+                exit 1
+              fi
+              sleep 10
+            done
+            
+            # Проверка frontend
+            for i in {1..10}; do
+              if curl -f -s http://localhost:3000 > /dev/null; then
+                echo "✅ Frontend is healthy"
+                break
+              fi
+              if [ $i -eq 10 ]; then
+                echo "❌ Frontend health check failed"
+                docker-compose -f docker-compose.prod.yml logs frontend
+                exit 1
+              fi
+              sleep 10
+            done
+            
+            # Очистка старых образов
+            echo "🧹 Cleaning up old images..."
+            docker image prune -f
+            
+            echo "🎉 Deployment completed successfully!"
+            echo "📊 Service status:"
+            docker-compose -f docker-compose.prod.yml ps
+          EOF
+
+      - name: 🔔 Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deployment to production completed successfully!"
+            echo "🌐 Frontend: https://lead-schem.ru"
+            echo "🔗 Backend API: https://api.lead-schem.ru"
+          else
+            echo "❌ Deployment failed!"
+          fi

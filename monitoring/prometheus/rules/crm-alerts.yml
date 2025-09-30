@@ -1,0 +1,128 @@
+groups:
+  - name: crm-system-alerts
+    rules:
+      # Высокое использование CPU
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование CPU на {{ $labels.instance }}"
+          description: "CPU использование составляет {{ $value }}% в течение 5 минут"
+
+      # Высокое использование памяти
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование памяти на {{ $labels.instance }}"
+          description: "Использование памяти составляет {{ $value }}%"
+
+      # Мало свободного места на диске
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Мало свободного места на диске {{ $labels.device }}"
+          description: "Свободного места осталось {{ $value }}%"
+
+  - name: crm-application-alerts
+    rules:
+      # Backend недоступен
+      - alert: BackendDown
+        expr: up{job="crm-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRM Backend недоступен"
+          description: "Backend сервис не отвечает более 1 минуты"
+
+      # Frontend недоступен
+      - alert: FrontendDown
+        expr: up{job="crm-frontend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRM Frontend недоступен"
+          description: "Frontend сервис не отвечает более 1 минуты"
+
+      # Высокий процент ошибок HTTP
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокий процент ошибок HTTP"
+          description: "Процент ошибок 5xx составляет {{ $value }}%"
+
+      # Медленные HTTP запросы
+      - alert: SlowHTTPRequests
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Медленные HTTP запросы"
+          description: "95-й процентиль времени ответа составляет {{ $value }} секунд"
+
+  - name: crm-database-alerts
+    rules:
+      # PostgreSQL недоступен
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL недоступен"
+          description: "База данных не отвечает более 1 минуты"
+
+      # Много активных соединений с БД
+      - alert: TooManyDBConnections
+        expr: pg_stat_activity_count > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Слишком много соединений с БД"
+          description: "Активных соединений: {{ $value }}"
+
+      # Медленные запросы к БД
+      - alert: SlowDatabaseQueries
+        expr: pg_stat_activity_max_tx_duration > 300
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Медленные запросы к базе данных"
+          description: "Максимальная длительность транзакции: {{ $value }} секунд"
+
+  - name: crm-redis-alerts
+    rules:
+      # Redis недоступен
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis недоступен"
+          description: "Redis сервис не отвечает более 1 минуты"
+
+      # Высокое использование памяти Redis
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование памяти Redis"
+          description: "Использование памяти Redis: {{ $value }}%"
