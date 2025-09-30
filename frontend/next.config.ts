@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   
+  // Standalone output для Docker
+  output: 'standalone',
+  
   // Оптимизация для продакшена
   compress: true,
   poweredByHeader: false,
