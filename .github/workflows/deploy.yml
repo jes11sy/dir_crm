@@ -295,28 +295,28 @@ jobs:
               # Включаем Docker autostart
               systemctl enable docker 2>/dev/null || true
               
-              # Создаём systemd сервис для CRM
-              cat > /etc/systemd/system/crm-system.service << 'EOFSERVICE'
-[Unit]
-Description=CRM System (Docker Compose)
-Requires=docker.service
-After=docker.service network-online.target
-Wants=network-online.target
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-WorkingDirectory=/opt/crm-system
-ExecStartPre=/bin/sleep 10
-ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up -d
-ExecStop=/usr/bin/docker compose -f docker-compose.prod.yml down
-TimeoutStartSec=300
-Restart=on-failure
-RestartSec=10s
-
-[Install]
-WantedBy=multi-user.target
-EOFSERVICE
+              # Создаём systemd сервис для CRM (используя printf для избежания проблем с YAML)
+              printf '%s\n' \
+                '[Unit]' \
+                'Description=CRM System (Docker Compose)' \
+                'Requires=docker.service' \
+                'After=docker.service network-online.target' \
+                'Wants=network-online.target' \
+                '' \
+                '[Service]' \
+                'Type=oneshot' \
+                'RemainAfterExit=yes' \
+                'WorkingDirectory=/opt/crm-system' \
+                'ExecStartPre=/bin/sleep 10' \
+                'ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up -d' \
+                'ExecStop=/usr/bin/docker compose -f docker-compose.prod.yml down' \
+                'TimeoutStartSec=300' \
+                'Restart=on-failure' \
+                'RestartSec=10s' \
+                '' \
+                '[Install]' \
+                'WantedBy=multi-user.target' \
+                > /etc/systemd/system/crm-system.service
               
               # Включаем автозапуск
               systemctl daemon-reload
