@@ -29,13 +29,12 @@ export default function AdminLoginPage() {
         localStorage.setItem('adminToken', result.token)
         localStorage.setItem('adminUser', JSON.stringify(result.admin))
         
-        // Перенаправляем в админку
-        router.push('/admin')
+        // Перенаправляем на страницу заказов
+        router.push('/orders')
       } else {
         alert(result.message || 'Ошибка входа')
       }
     } catch (error) {
-      console.error('Ошибка входа администратора:', error)
       alert('Ошибка подключения к серверу')
     } finally {
       setIsLoading(false)

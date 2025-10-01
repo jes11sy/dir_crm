@@ -36,7 +36,6 @@ export default function LoginPage() {
         alert(result.message || 'Ошибка входа')
       }
     } catch (error) {
-      console.error('Ошибка входа:', error)
       alert('Ошибка подключения к серверу')
     } finally {
       setIsLoading(false)
