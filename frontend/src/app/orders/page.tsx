@@ -74,8 +74,10 @@ export default function OrdersPage() {
     loadFilterOptions()
   }, [])
 
-  const loadOrders = async (page: number = 1) => {
+  const loadOrders = async (page: number = 1, customFilters?: typeof filters) => {
     try {
+      // Используем переданные фильтры или текущие
+      const activeFilters = customFilters || filters
       
       // Строим URL с параметрами фильтрации
       const params = new URLSearchParams({
@@ -83,10 +85,10 @@ export default function OrdersPage() {
         limit: '10'
       })
       
-      if (filters.search) params.append('search', filters.search)
-      if (filters.status !== 'all') params.append('status', filters.status)
-      if (filters.city !== 'all') params.append('city', filters.city)
-      if (filters.master !== 'all') params.append('master', filters.master)
+      if (activeFilters.search) params.append('search', activeFilters.search)
+      if (activeFilters.status !== 'all') params.append('status', activeFilters.status)
+      if (activeFilters.city !== 'all') params.append('city', activeFilters.city)
+      if (activeFilters.master !== 'all') params.append('master', activeFilters.master)
       
       const response = await fetch(`${config.apiUrl}/api/orders?${params.toString()}`, {
         method: 'GET',
@@ -272,10 +274,10 @@ export default function OrdersPage() {
     // Для поиска добавляем небольшую задержку
     if (newFilters.search !== filters.search) {
       setTimeout(() => {
-        loadOrders(1)
+        loadOrders(1, newFilters) // Передаем новые фильтры
       }, 500)
     } else {
-      loadOrders(1) // Сбрасываем на первую страницу при изменении фильтров
+      loadOrders(1, newFilters) // Передаем новые фильтры напрямую
     }
   }
 
