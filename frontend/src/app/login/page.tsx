@@ -30,8 +30,8 @@ export default function LoginPage() {
         // Обновляем AuthProvider
         login(result.token, result.user)
         
-        // Перенаправляем на главную страницу
-        router.push('/')
+        // Перенаправляем на страницу заказов
+        router.push('/orders')
       } else {
         alert(result.message || 'Ошибка входа')
       }
