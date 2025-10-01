@@ -138,7 +138,7 @@ export const authRateLimiter = createRateLimiter({
 
 export const apiRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 минут
-  max: 100, // 100 запросов
+  max: 5000, // 5000 запросов (увеличено для нормальной работы)
   message: 'Слишком много запросов к API'
 })
 
@@ -158,6 +158,20 @@ export const audioRateLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 час
   max: isProduction ? 100 : 500, // 100 запросов аудио в час в продакшене
   message: 'Превышен лимит запросов аудиофайлов'
+})
+
+// Мягкий лимитер для GET запросов (чтение данных)
+export const readApiRateLimiter = createRateLimiter({
+  windowMs: 5 * 60 * 1000, // 5 минут
+  max: 5000, // 5000 запросов за 5 минут
+  message: 'Слишком много запросов на чтение данных'
+})
+
+// Строгий лимитер для POST/PUT/DELETE запросов (изменение данных)
+export const writeApiRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 1000, // 1000 запросов за 15 минут
+  message: 'Слишком много запросов на изменение данных'
 })
 
 // Middleware для логирования превышения лимитов

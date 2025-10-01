@@ -71,32 +71,58 @@ export const getOrders = async (req: Request, res: Response) => {
     
     console.log('🔍 Where условие:', JSON.stringify(where, null, 2))
 
-    const [orders, total] = await Promise.all([
-      prisma.order.findMany({
-        where,
-        skip,
-        take: Number(limit),
-        include: {
-          master: {
-            select: {
-              id: true,
-              name: true,
-              cities: true
-            }
-          },
-          operator: {
-            select: {
-              id: true,
-              name: true
-            }
+    // Получаем все заказы без пагинации для правильной сортировки
+    const allOrders = await prisma.order.findMany({
+      where,
+      include: {
+        master: {
+          select: {
+            id: true,
+            name: true,
+            cities: true
           }
         },
-        orderBy: {
-          createdAt: 'desc'
+        operator: {
+          select: {
+            id: true,
+            name: true
+          }
         }
-      }),
-      prisma.order.count({ where })
-    ])
+      }
+    })
+
+    // Кастомная сортировка: сначала "Ожидает" по дате встречи, потом остальные
+    const statusPriority: Record<string, number> = {
+      'Ожидает': 1,
+      'Принял': 2,
+      'В работе': 3,
+      'Модерн': 4,
+      'Готово': 5,
+      'Отказ': 6,
+      'Незаказ': 7
+    }
+
+    const sortedOrders = allOrders.sort((a, b) => {
+      const priorityA = statusPriority[a.statusOrder] || 999
+      const priorityB = statusPriority[b.statusOrder] || 999
+      
+      // Сравниваем по приоритету статуса
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB
+      }
+      
+      // Если статусы одинаковые, сортируем по дате встречи (для "Ожидает" - ближайшие первыми)
+      if (a.statusOrder === 'Ожидает' && b.statusOrder === 'Ожидает') {
+        return new Date(a.dateMeeting).getTime() - new Date(b.dateMeeting).getTime()
+      }
+      
+      // Для остальных статусов - по дате создания (новые первыми)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+
+    // Применяем пагинацию к отсортированным данным
+    const total = sortedOrders.length
+    const orders = sortedOrders.slice(skip, skip + Number(limit))
 
     const result = {
       orders,

@@ -116,17 +116,16 @@ export function OrdersTable({ orders, onEdit, onDelete, onView, isLoading = fals
     ? filterOptions.masters 
     : Array.from(new Set(orders.map(order => order.master?.name).filter(Boolean)))
   
-  // Простое решение - используем данные из текущих заказов
-  const statuses = Array.from(new Set(orders.map(order => order.statusOrder)))
-  
-  // Создаем маппинг статусов для фильтра
-  const statusMapping = {
-    'Ожидает': 'pending',
-    'Модерн': 'modern', 
-    'Готово': 'ready',
-    'Отказ': 'refusal',
-    'Незаказ': 'no_order'
-  }
+  // Список всех доступных статусов (русские названия - как в БД)
+  const availableStatuses = [
+    'Ожидает',
+    'Принял', 
+    'В работе',
+    'Модерн',
+    'Готово',
+    'Отказ',
+    'Незаказ'
+  ]
 
   // Фильтрация происходит на сервере, поэтому просто используем orders
   const filteredOrders = orders
@@ -142,13 +141,13 @@ export function OrdersTable({ orders, onEdit, onDelete, onView, isLoading = fals
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "bg-blue-100 text-blue-800"
-      case "accepted": return "bg-green-100 text-green-800"
-      case "in_work": return "bg-yellow-100 text-yellow-800"
-      case "ready": return "bg-emerald-100 text-emerald-800"
-      case "refusal": return "bg-red-100 text-red-800"
-      case "modern": return "bg-purple-100 text-purple-800"
-      case "no_order": return "bg-gray-100 text-gray-800"
+      case "Ожидает": return "bg-blue-100 text-blue-800"
+      case "Принял": return "bg-green-100 text-green-800"
+      case "В работе": return "bg-yellow-100 text-yellow-800"
+      case "Готово": return "bg-emerald-100 text-emerald-800"
+      case "Отказ": return "bg-red-100 text-red-800"
+      case "Модерн": return "bg-purple-100 text-purple-800"
+      case "Незаказ": return "bg-gray-100 text-gray-800"
       default: return "bg-gray-100 text-gray-800"
     }
   }
@@ -171,18 +170,6 @@ export function OrdersTable({ orders, onEdit, onDelete, onView, isLoading = fals
     }
   }
 
-  const translateStatus = (status: string) => {
-    switch (status) {
-      case "pending": return "Ожидает"
-      case "accepted": return "Принял"
-      case "in_work": return "В работе"
-      case "ready": return "Готово"
-      case "refusal": return "Отказ"
-      case "modern": return "Модерн"
-      case "no_order": return "Незаказ"
-      default: return status
-    }
-  }
 
   // Генерируем временные слоты от 10:00 до 22:00 с интервалом 30 минут
   const generateTimeSlots = () => {
@@ -355,9 +342,9 @@ export function OrdersTable({ orders, onEdit, onDelete, onView, isLoading = fals
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Все статусы</SelectItem>
-            {statuses.map(status => (
+            {availableStatuses.map(status => (
               <SelectItem key={status} value={status}>
-                {statusMapping[status as keyof typeof statusMapping] || status}
+                {status}
               </SelectItem>
             ))}
           </SelectContent>
@@ -547,7 +534,7 @@ export function OrdersTable({ orders, onEdit, onDelete, onView, isLoading = fals
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.statusOrder)}`}>
-                      {translateStatus(order.statusOrder)}
+                      {order.statusOrder}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -581,9 +568,9 @@ export function OrdersTable({ orders, onEdit, onDelete, onView, isLoading = fals
                         variant="ghost"
                         size="sm"
                         onClick={() => onEdit?.(order)}
-                        disabled={['ready', 'refusal', 'no_order'].includes(order.statusOrder)}
+                        disabled={['Готово', 'Отказ', 'Незаказ'].includes(order.statusOrder)}
                         className="h-8 w-8 p-0"
-                        title={['ready', 'refusal', 'no_order'].includes(order.statusOrder) ? 'Заказ нельзя редактировать' : 'Редактировать заказ'}
+                        title={['Готово', 'Отказ', 'Незаказ'].includes(order.statusOrder) ? 'Заказ нельзя редактировать' : 'Редактировать заказ'}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
