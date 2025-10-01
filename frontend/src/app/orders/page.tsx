@@ -275,14 +275,15 @@ export default function OrdersPage() {
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters)
-    setLoading(true)
     
-    // Для поиска добавляем небольшую задержку
+    // Для поиска добавляем небольшую задержку, но не показываем полноэкранный loader
     if (newFilters.search !== filters.search) {
       setTimeout(() => {
         loadOrders(1, newFilters) // Передаем новые фильтры
       }, 500)
     } else {
+      // Для других фильтров показываем загрузку
+      setLoading(true)
       loadOrders(1, newFilters) // Передаем новые фильтры напрямую
     }
   }

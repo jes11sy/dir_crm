@@ -62,11 +62,18 @@ export const getOrders = async (req: Request, res: Response) => {
     }
     
     if (search) {
-      where.OR = [
+      const searchConditions: any[] = [
         { phone: { contains: search as string } },
-        { clientName: { contains: search as string } },
-        { avitoName: { contains: search as string } }
+        { address: { contains: search as string } }
       ]
+      
+      // Если search - это число, добавляем поиск по ID
+      const searchAsNumber = parseInt(search as string)
+      if (!isNaN(searchAsNumber)) {
+        searchConditions.push({ id: searchAsNumber })
+      }
+      
+      where.OR = searchConditions
     }
     
     console.log('🔍 Where условие:', JSON.stringify(where, null, 2))
