@@ -155,7 +155,13 @@ export default function OrdersPage() {
 
   const loadMasters = async () => {
     try {
-      const response = await fetch(`${config.apiUrl}/api/masters`, {
+      // Загружаем всех мастеров (без пагинации)
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '1000' // Большой лимит, чтобы получить всех мастеров
+      })
+      
+      const response = await fetch(`${config.apiUrl}/api/masters?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
