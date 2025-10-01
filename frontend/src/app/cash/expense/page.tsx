@@ -25,6 +25,12 @@ export default function CashExpensePage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [directorCities, setDirectorCities] = useState<string[]>([])
   const [directorName, setDirectorName] = useState<string>("Директор")
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0
+  })
 
   useEffect(() => {
     loadExpenses()
@@ -59,9 +65,15 @@ export default function CashExpensePage() {
     }
   }
 
-  const loadExpenses = async () => {
+  const loadExpenses = async (page: number = 1) => {
     try {
-      const response = await fetch(`${config.apiUrl}/api/cash?type=расход`, {
+      const params = new URLSearchParams({
+        type: 'расход',
+        page: page.toString(),
+        limit: '10'
+      })
+      
+      const response = await fetch(`${config.apiUrl}/api/cash?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -76,6 +88,7 @@ export default function CashExpensePage() {
 
       const data = await response.json()
       setExpenses(data.operations || [])
+      setPagination(data.pagination || { page: 1, limit: 10, total: 0, pages: 0 })
     } catch (error) {
       // Fallback к тестовым данным
       const mockExpenses: ExpenseData[] = [
@@ -129,6 +142,11 @@ export default function CashExpensePage() {
 
   const handleExport = () => {
     // Здесь будет логика экспорта
+  }
+
+  const handlePageChange = (page: number) => {
+    setLoading(true)
+    loadExpenses(page)
   }
 
   // Статистика
@@ -222,6 +240,8 @@ export default function CashExpensePage() {
               <CardContent>
                 <CashHistoryTable
                   operations={expenses}
+                  pagination={pagination}
+                  onPageChange={handlePageChange}
                 />
               </CardContent>
             </Card>

@@ -48,63 +48,26 @@ interface CashHistoryTableProps {
   operations: CashOperation[]
   isLoading?: boolean
   error?: string | null
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
+  onPageChange?: (page: number) => void
+  filters?: {
+    type: string
+    dateFrom: string
+    dateTo: string
+  }
+  onFilterChange?: (filters: any) => void
 }
 
-export function CashHistoryTable({ operations, isLoading = false, error }: CashHistoryTableProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [dateFilter, setDateFilter] = useState("all")
-  const [sortField, setSortField] = useState<keyof CashOperation>("id")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
+export function CashHistoryTable({ operations, isLoading = false, error, pagination, onPageChange, filters, onFilterChange }: CashHistoryTableProps) {
+  const [typeFilter, setTypeFilter] = useState(filters?.type || "all")
 
-  // Получаем уникальные значения для фильтров
-  const types = Array.from(new Set(operations.map(op => op.name)))
-  const dates = Array.from(new Set(operations.map(op => 
-    new Date(op.dateCreate).toLocaleDateString('ru-RU')
-  )))
-
-  // Фильтрация и сортировка
+  // Фильтрация на сервере, поэтому просто используем operations
   const filteredOperations = operations
-    .filter(operation => {
-      const matchesSearch = 
-        operation.note.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        operation.nameCreate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        operation.amount.toString().includes(searchTerm)
-      
-      const matchesType = typeFilter === "all" || operation.name === typeFilter
-      const matchesDate = dateFilter === "all" || 
-        new Date(operation.dateCreate).toLocaleDateString('ru-RU') === dateFilter
-
-      return matchesSearch && matchesType && matchesDate
-    })
-    .sort((a, b) => {
-      const aValue = a[sortField]
-      const bValue = b[sortField]
-      
-      if (aValue === null || aValue === undefined) return 1
-      if (bValue === null || bValue === undefined) return -1
-      
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortDirection === "asc" 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue)
-      }
-      
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sortDirection === "asc" ? aValue - bValue : bValue - aValue
-      }
-      
-      return 0
-    })
-
-  const handleSort = (field: keyof CashOperation) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-    } else {
-      setSortField(field)
-      setSortDirection("asc")
-    }
-  }
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -134,41 +97,22 @@ export function CashHistoryTable({ operations, isLoading = false, error }: CashH
   return (
     <LoadingOverlay isLoading={isLoading} className="w-full h-full flex flex-col">
 
-      {/* Фильтры и поиск */}
+      {/* Фильтры */}
       <div className="flex flex-wrap gap-4 mb-6">
-        <div className="flex-1 min-w-[300px]">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Поиск по сумме, заметкам, создателю..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-10"
-            />
-          </div>
-        </div>
-        
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
+        <Select value={typeFilter} onValueChange={(value) => {
+          setTypeFilter(value)
+          onFilterChange?.({
+            ...filters,
+            type: value
+          })
+        }}>
           <SelectTrigger className="w-[150px] h-10">
             <SelectValue placeholder="Тип" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Все типы</SelectItem>
-            {types.map(type => (
-              <SelectItem key={type} value={type}>{type}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={dateFilter} onValueChange={setDateFilter}>
-          <SelectTrigger className="w-[150px] h-10">
-            <SelectValue placeholder="Дата" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все даты</SelectItem>
-            {dates.map(date => (
-              <SelectItem key={date} value={date}>{date}</SelectItem>
-            ))}
+            <SelectItem value="приход">Приход</SelectItem>
+            <SelectItem value="расход">Расход</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -183,64 +127,34 @@ export function CashHistoryTable({ operations, isLoading = false, error }: CashH
           <Table>
             <TableHeader>
             <TableRow>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("id")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <span>ID</span>
-                  {sortField === "id" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("name")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <span>Тип</span>
-                  {sortField === "name" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
               <TableHead>Город</TableHead>
               <TableHead>Назначение платежа</TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("amount")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <span>Сумма</span>
-                  {sortField === "amount" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
               <TableHead className="min-w-[300px]">Комментарий</TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("dateCreate")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <Calendar className="w-4 h-4" />
                   <span>Дата</span>
-                  {sortField === "dateCreate" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("nameCreate")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <User className="w-4 h-4" />
                   <span>Создатель</span>
-                  {sortField === "nameCreate" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
             <TableHead>Документ</TableHead>
@@ -313,6 +227,37 @@ export function CashHistoryTable({ operations, isLoading = false, error }: CashH
       {filteredOperations.length === 0 && !isLoading && (
         <div className="text-center py-8 text-gray-500">
           Операции не найдены
+        </div>
+      )}
+
+      {/* Пагинация */}
+      {pagination && onPageChange && (
+        <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
+          <div className="text-sm text-gray-700">
+            Показано {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} из {pagination.total} операций
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onPageChange(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              className="px-3 py-1 text-sm border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Назад
+            </button>
+            
+            <span className="text-sm text-gray-700">
+              Страница {pagination.page} из {pagination.pages}
+            </span>
+            
+            <button
+              onClick={() => onPageChange(pagination.page + 1)}
+              disabled={pagination.page >= pagination.pages}
+              className="px-3 py-1 text-sm border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Вперед
+            </button>
+          </div>
         </div>
       )}
     </LoadingOverlay>

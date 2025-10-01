@@ -30,15 +30,35 @@ export default function MastersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0
+  })
+  const [filters, setFilters] = useState({
+    search: '',
+    city: 'all',
+    status: 'all'
+  })
 
   // Загрузка данных
   useEffect(() => {
     loadMasters()
   }, [])
 
-  const loadMasters = async () => {
+  const loadMasters = async (page: number = 1) => {
     try {
-      const response = await fetch(`${config.apiUrl}/api/masters`, {
+      // Строим URL с параметрами
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '10'
+      })
+      
+      if (filters.city !== 'all') params.append('city', filters.city)
+      if (filters.status !== 'all') params.append('status_work', filters.status)
+      
+      const response = await fetch(`${config.apiUrl}/api/masters?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -53,6 +73,7 @@ export default function MastersPage() {
 
       const data = await response.json()
       setMasters(data.masters || [])
+      setPagination(data.pagination || { page: 1, limit: 10, total: 0, pages: 0 })
     } catch (error) {
       // Fallback к тестовым данным
       const mockMasters: Master[] = [
@@ -184,8 +205,19 @@ export default function MastersPage() {
     window.location.href = `/masters/${master.id}/history`
   }
 
-  // Статистика
-  const totalMasters = masters.length
+  const handlePageChange = (page: number) => {
+    setLoading(true)
+    loadMasters(page)
+  }
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters)
+    setLoading(true)
+    loadMasters(1) // Сбрасываем на первую страницу при изменении фильтров
+  }
+
+  // Статистика (используем данные из пагинации для точности)
+  const totalMasters = pagination.total
   const activeMasters = masters.filter(master => master.statusWork === "работает").length
   const inactiveMasters = masters.filter(master => master.statusWork !== "работает").length
   
@@ -272,6 +304,10 @@ export default function MastersPage() {
                   onView={handleViewMaster}
                   onDelete={handleDeleteMaster}
                   onHistory={handleHistoryMaster}
+                  pagination={pagination}
+                  onPageChange={handlePageChange}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
                 />
               </CardContent>
             </Card>

@@ -59,15 +59,25 @@ interface MastersTableProps {
   onHistory?: (master: Master) => void
   isLoading?: boolean
   error?: string | null
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
+  onPageChange?: (page: number) => void
+  filters?: {
+    search: string
+    city: string
+    status: string
+  }
+  onFilterChange?: (filters: any) => void
 }
 
-export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isLoading = false, error }: MastersTableProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [cityFilter, setCityFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [sortField, setSortField] = useState<keyof Master>("id")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-
+export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isLoading = false, error, pagination, onPageChange, filters, onFilterChange }: MastersTableProps) {
+  const [searchTerm, setSearchTerm] = useState(filters?.search || "")
+  const [cityFilter, setCityFilter] = useState(filters?.city || "all")
+  const [statusFilter, setStatusFilter] = useState(filters?.status || "all")
 
   // Получаем уникальные значения для фильтров
   const cities = Array.from(new Set(masters.flatMap(master => {
@@ -75,54 +85,10 @@ export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isL
     const masterCities = (master as any).cities || master.city
     return Array.isArray(masterCities) ? masterCities : [masterCities]
   })))
-  const statuses = Array.from(new Set(masters.map(master => master.statusWork)))
+  const statuses = ["работает", "уволен", "в отпуске", "больничный"]
 
-  // Фильтрация и сортировка
+  // Фильтрация на сервере, поэтому просто используем masters
   const filteredMasters = masters
-    .filter(master => {
-      // Проверяем, есть ли поле cities (новый формат) или city (старый формат)
-      const masterCities = (master as any).cities || master.city
-      const citiesArray = Array.isArray(masterCities) ? masterCities : [masterCities]
-      const cityString = citiesArray.join(', ')
-      
-      const matchesSearch = 
-        master.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cityString.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (master.note && master.note.toLowerCase().includes(searchTerm.toLowerCase()))
-      
-      const matchesCity = cityFilter === "all" || citiesArray.includes(cityFilter)
-      const matchesStatus = statusFilter === "all" || master.statusWork === statusFilter
-
-      return matchesSearch && matchesCity && matchesStatus
-    })
-    .sort((a, b) => {
-      const aValue = a[sortField]
-      const bValue = b[sortField]
-      
-      if (aValue === null || aValue === undefined) return 1
-      if (bValue === null || bValue === undefined) return -1
-      
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortDirection === "asc" 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue)
-      }
-      
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sortDirection === "asc" ? aValue - bValue : bValue - aValue
-      }
-      
-      return 0
-    })
-
-  const handleSort = (field: keyof Master) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-    } else {
-      setSortField(field)
-      setSortDirection("asc")
-    }
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -167,7 +133,13 @@ export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isL
           </div>
         </div>
         
-        <Select value={cityFilter} onValueChange={setCityFilter}>
+        <Select value={cityFilter} onValueChange={(value) => {
+          setCityFilter(value)
+          onFilterChange?.({
+            ...filters,
+            city: value
+          })
+        }}>
           <SelectTrigger className="w-[150px] h-10">
             <SelectValue placeholder="Город" />
           </SelectTrigger>
@@ -179,7 +151,13 @@ export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isL
           </SelectContent>
         </Select>
 
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={(value) => {
+          setStatusFilter(value)
+          onFilterChange?.({
+            ...filters,
+            status: value
+          })
+        }}>
           <SelectTrigger className="w-[150px] h-10">
             <SelectValue placeholder="Статус" />
           </SelectTrigger>
@@ -202,27 +180,15 @@ export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isL
           <Table>
             <TableHeader>
             <TableRow>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("id")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <span>ID</span>
-                  {sortField === "id" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("name")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <User className="w-4 h-4" />
                   <span>Имя</span>
-                  {sortField === "name" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
               <TableHead>
@@ -231,27 +197,15 @@ export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isL
                   <span>Города</span>
                 </div>
               </TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("statusWork")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <span>Статус</span>
-                  {sortField === "statusWork" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
-              <TableHead 
-                className="cursor-pointer hover:bg-gray-50"
-                onClick={() => handleSort("dateCreate")}
-              >
+              <TableHead>
                 <div className="flex items-center space-x-1">
                   <Calendar className="w-4 h-4" />
                   <span>Дата создания</span>
-                  {sortField === "dateCreate" && (
-                    sortDirection === "asc" ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                  )}
                 </div>
               </TableHead>
               <TableHead>Паспорт</TableHead>
@@ -385,6 +339,37 @@ export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isL
       {filteredMasters.length === 0 && !isLoading && (
         <div className="text-center py-8 text-gray-500">
           Мастера не найдены
+        </div>
+      )}
+
+      {/* Пагинация */}
+      {pagination && onPageChange && (
+        <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
+          <div className="text-sm text-gray-700">
+            Показано {((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)} из {pagination.total} мастеров
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onPageChange(pagination.page - 1)}
+              disabled={pagination.page <= 1}
+              className="px-3 py-1 text-sm border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Назад
+            </button>
+            
+            <span className="text-sm text-gray-700">
+              Страница {pagination.page} из {pagination.pages}
+            </span>
+            
+            <button
+              onClick={() => onPageChange(pagination.page + 1)}
+              disabled={pagination.page >= pagination.pages}
+              className="px-3 py-1 text-sm border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Вперед
+            </button>
+          </div>
         </div>
       )}
     </LoadingOverlay>

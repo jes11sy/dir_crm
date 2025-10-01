@@ -21,14 +21,35 @@ interface CashOperation {
 export default function CashHistoryPage() {
   const [operations, setOperations] = useState<CashOperation[]>([])
   const [loading, setLoading] = useState(true)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 0
+  })
+  const [filters, setFilters] = useState({
+    type: 'all',
+    dateFrom: '',
+    dateTo: ''
+  })
 
   useEffect(() => {
     loadOperations()
   }, [])
 
-  const loadOperations = async () => {
+  const loadOperations = async (page: number = 1) => {
     try {
-      const response = await fetch(`${config.apiUrl}/api/cash?type=all`, {
+      // Строим URL с параметрами
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '10'
+      })
+      
+      if (filters.type !== 'all') params.append('type', filters.type)
+      if (filters.dateFrom) params.append('date_from', filters.dateFrom)
+      if (filters.dateTo) params.append('date_to', filters.dateTo)
+      
+      const response = await fetch(`${config.apiUrl}/api/cash?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -43,6 +64,7 @@ export default function CashHistoryPage() {
 
       const data = await response.json()
       setOperations(data.operations || [])
+      setPagination(data.pagination || { page: 1, limit: 10, total: 0, pages: 0 })
     } catch (error) {
       // Fallback к тестовым данным
       const mockOperations: CashOperation[] = [
@@ -89,7 +111,18 @@ export default function CashHistoryPage() {
     // Здесь будет логика экспорта
   }
 
-  // Статистика
+  const handlePageChange = (page: number) => {
+    setLoading(true)
+    loadOperations(page)
+  }
+
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters)
+    setLoading(true)
+    loadOperations(1) // Сбрасываем на первую страницу при изменении фильтров
+  }
+
+  // Статистика (для текущей страницы)
   const incomes = operations.filter(op => op.name === 'приход')
   const expenses = operations.filter(op => op.name === 'расход')
   const totalIncomes = incomes.reduce((sum, op) => sum + op.amount, 0)
@@ -172,7 +205,7 @@ export default function CashHistoryPage() {
                   <div>
                     <CardTitle className="flex items-center space-x-2">
                       <History className="w-5 h-5" />
-                      <span>История операций ({operations.length})</span>
+                      <span>История операций ({pagination.total})</span>
                     </CardTitle>
                     <CardDescription>
                       Все операции с кассой в хронологическом порядке
@@ -189,6 +222,10 @@ export default function CashHistoryPage() {
               <CardContent>
                 <CashHistoryTable
                   operations={operations}
+                  pagination={pagination}
+                  onPageChange={handlePageChange}
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
                 />
               </CardContent>
             </Card>
