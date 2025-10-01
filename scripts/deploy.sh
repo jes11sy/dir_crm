@@ -204,6 +204,49 @@ health_check() {
     log_success "Все сервисы работают корректно"
 }
 
+# Настройка автозапуска после перезагрузки сервера
+setup_autostart() {
+    log_info "🔄 Настройка автозапуска после перезагрузки сервера..."
+    
+    # Проверка наличия systemd сервиса
+    if [[ ! -f /etc/systemd/system/crm-system.service ]]; then
+        log_info "📋 Создание systemd сервиса для автозапуска..."
+        
+        # Включаем Docker autostart
+        sudo systemctl enable docker 2>/dev/null || true
+        
+        # Создаём systemd сервис для CRM
+        sudo bash -c 'cat > /etc/systemd/system/crm-system.service' << 'EOFSERVICE'
+[Unit]
+Description=CRM System (Docker Compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/crm-system
+ExecStartPre=/bin/sleep 10
+ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up -d
+ExecStop=/usr/bin/docker compose -f docker-compose.prod.yml down
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+EOFSERVICE
+        
+        # Включаем автозапуск
+        sudo systemctl daemon-reload
+        sudo systemctl enable crm-system.service
+        log_success "Autostart configured! CRM will start automatically after server reboot"
+    else
+        log_info "✅ Autostart already configured"
+    fi
+}
+
 # Очистка старых образов
 cleanup() {
     log_info "🧹 Очистка старых образов..."
@@ -243,6 +286,7 @@ main() {
     run_migrations
     start_services
     health_check
+    setup_autostart
     cleanup
     send_notification
     

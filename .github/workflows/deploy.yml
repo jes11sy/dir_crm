@@ -287,6 +287,45 @@ jobs:
             sleep 5
             echo "✅ Nginx reloaded"
             
+            # Настройка автозапуска после перезагрузки сервера
+            echo "🔄 Setting up autostart on server reboot..."
+            if [ ! -f /etc/systemd/system/crm-system.service ]; then
+              echo "📋 Creating systemd service for autostart..."
+              
+              # Включаем Docker autostart
+              systemctl enable docker 2>/dev/null || true
+              
+              # Создаём systemd сервис для CRM
+              cat > /etc/systemd/system/crm-system.service << 'EOFSERVICE'
+[Unit]
+Description=CRM System (Docker Compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/crm-system
+ExecStartPre=/bin/sleep 10
+ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up -d
+ExecStop=/usr/bin/docker compose -f docker-compose.prod.yml down
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+EOFSERVICE
+              
+              # Включаем автозапуск
+              systemctl daemon-reload
+              systemctl enable crm-system.service
+              echo "✅ Autostart configured! CRM will start automatically after server reboot"
+            else
+              echo "✅ Autostart already configured"
+            fi
+            
             # Очистка старых образов
             echo "🧹 Cleaning up old images..."
             docker image prune -f
