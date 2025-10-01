@@ -86,10 +86,12 @@ stop_services() {
     docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
     docker compose -f docker-compose.prod.yml down 2>/dev/null || true
     
-    # Принудительная остановка контейнеров
-    log_info "🛑 Принудительная остановка CRM контейнеров..."
-    docker stop crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
-    docker rm crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
+    # Принудительное удаление ВСЕХ контейнеров CRM (включая остановленные)
+    log_info "🛑 Принудительное удаление ВСЕХ CRM контейнеров..."
+    docker ps -a --filter "name=crm-" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+    
+    # Дополнительно по именам (на всякий случай)
+    docker rm -f crm-nginx crm-backend crm-frontend crm-redis crm-postgres 2>/dev/null || true
     
     # Очистка контейнеров
     log_info "🧹 Очистка старых контейнеров..."

@@ -19,9 +19,12 @@ docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
 docker compose -f docker-compose.prod.yml down 2>/dev/null || true
 
 echo ""
-echo "🛑 Принудительная остановка CRM контейнеров..."
-docker stop crm-nginx crm-backend crm-frontend crm-redis crm-postgres 2>/dev/null || true
-docker rm crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
+echo "🛑 Принудительное удаление ВСЕХ CRM контейнеров (включая остановленные)..."
+docker ps -a --filter "name=crm-" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+
+echo ""
+echo "🛑 Дополнительное удаление по именам..."
+docker rm -f crm-nginx crm-backend crm-frontend crm-redis crm-postgres 2>/dev/null || true
 
 echo ""
 echo "🧹 Удаляем старые/остановленные контейнеры..."

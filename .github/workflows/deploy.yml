@@ -159,10 +159,12 @@ jobs:
             docker compose -f docker-compose.prod.yml down 2>/dev/null || true
             docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
             
-            # Принудительная остановка контейнеров с этими именами
-            echo "🛑 Force stopping CRM containers..."
-            docker stop crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
-            docker rm crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
+            # Принудительное удаление ВСЕХ контейнеров CRM (включая остановленные)
+            echo "🛑 Force removing ALL CRM containers..."
+            docker ps -a --filter "name=crm-" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
+            
+            # Дополнительно по именам (на всякий случай)
+            docker rm -f crm-nginx crm-backend crm-frontend crm-redis crm-postgres 2>/dev/null || true
             
             # Безопасная очистка Docker (БЕЗ volumes!)
             echo "🧹 Cleaning Docker cache (preserving volumes)..."
