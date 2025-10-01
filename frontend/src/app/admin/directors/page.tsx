@@ -68,7 +68,6 @@ export default function AdminDirectorsPage() {
           router.push('/adlogin')
         }
       } catch (error) {
-        console.error('Ошибка проверки токена:', error)
         router.push('/adlogin')
       } finally {
         setIsLoading(false)
@@ -99,10 +98,8 @@ export default function AdminDirectorsPage() {
         const result = await response.json()
         setDirectors(result.directors || [])
       } else {
-        console.error('Ошибка загрузки директоров')
       }
     } catch (error) {
-      console.error('Ошибка загрузки директоров:', error)
     } finally {
       setDirectorsLoading(false)
     }
@@ -110,7 +107,6 @@ export default function AdminDirectorsPage() {
 
   const handleDirectorAdded = () => {
     loadDirectors() // Обновляем список директоров
-    console.log('Директор добавлен успешно')
   }
 
   const handleEditDirector = (director: Director) => {
@@ -126,13 +122,11 @@ export default function AdminDirectorsPage() {
   const handleDirectorUpdated = () => {
     loadDirectors() // Обновляем список директоров
     setSelectedDirector(null)
-    console.log('Директор обновлен успешно')
   }
 
   const handleDirectorDeleted = () => {
     loadDirectors() // Обновляем список директоров
     setSelectedDirector(null)
-    console.log('Директор удален успешно')
   }
 
   if (isLoading) {

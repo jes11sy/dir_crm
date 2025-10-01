@@ -160,7 +160,6 @@ export function DirectorEditModal({ isOpen, director, onClose, onSuccess }: Dire
         }
       }
     } catch (error) {
-      console.error('Ошибка обновления директора:', error)
       setValidationErrors({ general: 'Ошибка подключения к серверу' })
     } finally {
       setIsSubmitting(false)

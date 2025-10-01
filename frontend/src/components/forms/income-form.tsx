@@ -83,7 +83,6 @@ export function IncomeForm({ isOpen, onClose, onSubmit, loading = false, directo
     setValidationErrors(errors)
     
     if (!isValid) {
-      console.log('❌ Ошибки валидации:', errors)
       return
     }
 
@@ -92,7 +91,6 @@ export function IncomeForm({ isOpen, onClose, onSubmit, loading = false, directo
       
       // Если есть файл, загружаем его в S3
       if (receiptFile) {
-        console.log('📤 Загружаем файл в S3:', receiptFile.name)
         
         const uploadFormData = new FormData()
         uploadFormData.append('document', receiptFile)
@@ -111,7 +109,6 @@ export function IncomeForm({ isOpen, onClose, onSubmit, loading = false, directo
         }
 
         const uploadData = await uploadResponse.json()
-        console.log('✅ Файл загружен в S3:', uploadData)
         
         // Сохраняем URL файла из S3
         fileUrl = uploadData.url
@@ -124,9 +121,7 @@ export function IncomeForm({ isOpen, onClose, onSubmit, loading = false, directo
       }
       
       await onSubmit(submitData)
-      console.log('✅ Приход успешно создан')
     } catch (error) {
-      console.error('❌ Ошибка создания прихода:', error)
       alert('Ошибка создания прихода. Попробуйте еще раз.')
     }
   }

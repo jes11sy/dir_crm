@@ -44,20 +44,16 @@ export default function CashExpensePage() {
 
       if (response.ok) {
         const userData = await response.json()
-        console.log('👤 Данные директора:', userData)
         if (userData.user) {
           if (userData.user.cities) {
             setDirectorCities(userData.user.cities)
-            console.log('🏙️ Города директора:', userData.user.cities)
           }
           if (userData.user.name) {
             setDirectorName(userData.user.name)
-            console.log('👤 Имя директора:', userData.user.name)
           }
         }
       }
     } catch (error) {
-      console.error('Ошибка загрузки информации о директоре:', error)
       // Fallback к тестовым городам
       setDirectorCities(['Москва', 'СПб', 'Казань'])
     }
@@ -65,7 +61,6 @@ export default function CashExpensePage() {
 
   const loadExpenses = async () => {
     try {
-      console.log('🔄 Загружаем расходы...')
       const response = await fetch(`${config.apiUrl}/api/cash?type=расход`, {
         method: 'GET',
         headers: {
@@ -74,17 +69,14 @@ export default function CashExpensePage() {
         }
       })
 
-      console.log('📡 Ответ сервера (расходы):', response.status, response.statusText)
 
       if (!response.ok) {
         throw new Error(`Ошибка загрузки расходов: ${response.status}`)
       }
 
       const data = await response.json()
-      console.log('📦 Данные расходов:', data)
       setExpenses(data.operations || [])
     } catch (error) {
-      console.error("❌ Ошибка загрузки расходов:", error)
       // Fallback к тестовым данным
       const mockExpenses: ExpenseData[] = [
         {
@@ -104,7 +96,6 @@ export default function CashExpensePage() {
           dateCreate: "2024-01-14T14:30:00Z"
         }
       ]
-      console.log('🔄 Используем тестовые данные расходов')
       setExpenses(mockExpenses)
     } finally {
       setLoading(false)
@@ -132,14 +123,11 @@ export default function CashExpensePage() {
       const data = await response.json()
       setExpenses([...expenses, data.operation])
       setIsFormOpen(false)
-      console.log("Расход создан:", data.operation)
     } catch (error) {
-      console.error("Ошибка создания расхода:", error)
     }
   }
 
   const handleExport = () => {
-    console.log("Экспорт расходов")
     // Здесь будет логика экспорта
   }
 

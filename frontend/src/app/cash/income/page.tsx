@@ -44,20 +44,16 @@ export default function CashIncomePage() {
 
       if (response.ok) {
         const userData = await response.json()
-        console.log('👤 Данные директора:', userData)
         if (userData.user) {
           if (userData.user.cities) {
             setDirectorCities(userData.user.cities)
-            console.log('🏙️ Города директора:', userData.user.cities)
           }
           if (userData.user.name) {
             setDirectorName(userData.user.name)
-            console.log('👤 Имя директора:', userData.user.name)
           }
         }
       }
     } catch (error) {
-      console.error('Ошибка загрузки информации о директоре:', error)
       // Fallback к тестовым городам
       setDirectorCities(['Москва', 'СПб', 'Казань'])
     }
@@ -65,7 +61,6 @@ export default function CashIncomePage() {
 
   const loadIncomes = async () => {
     try {
-      console.log('🔄 Загружаем приходы...')
       const response = await fetch(`${config.apiUrl}/api/cash?type=приход`, {
         method: 'GET',
         headers: {
@@ -74,17 +69,14 @@ export default function CashIncomePage() {
         }
       })
 
-      console.log('📡 Ответ сервера (приходы):', response.status, response.statusText)
 
       if (!response.ok) {
         throw new Error(`Ошибка загрузки приходов: ${response.status}`)
       }
 
       const data = await response.json()
-      console.log('📦 Данные приходов:', data)
       setIncomes(data.operations || [])
     } catch (error) {
-      console.error("❌ Ошибка загрузки приходов:", error)
       // Fallback к тестовым данным
       const mockIncomes: IncomeData[] = [
         {
@@ -104,7 +96,6 @@ export default function CashIncomePage() {
           dateCreate: "2024-01-14T15:45:00Z"
         }
       ]
-      console.log('🔄 Используем тестовые данные приходов')
       setIncomes(mockIncomes)
     } finally {
       setLoading(false)
@@ -141,14 +132,11 @@ export default function CashIncomePage() {
       const data = await response.json()
       setIncomes([...incomes, data.operation])
       setIsFormOpen(false)
-      console.log("Приход создан:", data.operation)
     } catch (error) {
-      console.error("Ошибка создания прихода:", error)
     }
   }
 
   const handleExport = () => {
-    console.log("Экспорт приходов")
     // Здесь будет логика экспорта
   }
 

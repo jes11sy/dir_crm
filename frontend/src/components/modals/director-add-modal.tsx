@@ -149,7 +149,6 @@ export function DirectorAddModal({ isOpen, onClose, onSuccess }: DirectorAddModa
         }
       }
     } catch (error) {
-      console.error('Ошибка создания директора:', error)
       setValidationErrors({ general: 'Ошибка подключения к серверу' })
     } finally {
       setIsSubmitting(false)

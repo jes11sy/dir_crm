@@ -54,7 +54,6 @@ export default function MastersPage() {
       const data = await response.json()
       setMasters(data.masters || [])
     } catch (error) {
-      console.error("❌ Ошибка загрузки мастеров:", error)
       // Fallback к тестовым данным
       const mockMasters: Master[] = [
         {
@@ -85,7 +84,6 @@ export default function MastersPage() {
           note: "Уволен за нарушение дисциплины"
         }
       ]
-      console.log('🔄 Используем тестовые данные мастеров')
       setMasters(mockMasters)
     } finally {
       setLoading(false)
@@ -118,9 +116,7 @@ export default function MastersPage() {
         }
 
         setMasters(masters.filter(master => master.id !== masterId))
-        console.log("Мастер удален:", masterId)
       } catch (error) {
-        console.error("Ошибка удаления мастера:", error)
         // Fallback к локальному удалению
         setMasters(masters.filter(master => master.id !== masterId))
       }
@@ -148,7 +144,6 @@ export default function MastersPage() {
         setMasters(masters.map(master =>
           master.id === updatedMaster.id ? data.master : master
         ))
-        console.log("Мастер обновлен:", data.master)
       } else {
         // Добавление нового
         const response = await fetch(`${config.apiUrl}/api/masters`, {
@@ -166,10 +161,8 @@ export default function MastersPage() {
 
         const data = await response.json()
         setMasters([...masters, data.master])
-        console.log("Мастер создан:", data.master)
       }
     } catch (error) {
-      console.error("Ошибка сохранения мастера:", error)
       // Fallback к локальному обновлению
       if (updatedMaster.id) {
         setMasters(masters.map(master =>

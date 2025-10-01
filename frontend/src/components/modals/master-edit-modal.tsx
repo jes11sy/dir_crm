@@ -84,7 +84,6 @@ export function MasterEditModal({ master, isOpen, onClose, onSave }: MasterEditM
         setCurrentUser(data.user)
       }
     } catch (error) {
-      console.error('Ошибка загрузки профиля:', error)
     }
   }
 
@@ -244,7 +243,6 @@ export function MasterEditModal({ master, isOpen, onClose, onSave }: MasterEditM
         setFormData(prev => ({ ...prev, contractDoc: data.url }))
       }
     } catch (error) {
-      console.error('Ошибка загрузки файла:', error)
       alert('Ошибка загрузки файла. Попробуйте еще раз.')
       
       // Очищаем файл при ошибке

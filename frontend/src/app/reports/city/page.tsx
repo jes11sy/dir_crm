@@ -35,7 +35,6 @@ export default function ReportsCityPage() {
 
   const loadCityReports = async () => {
     try {
-      console.log('🔄 Загружаем отчет по городам...')
       
       // Получаем город директора из токена
       const token = localStorage.getItem('token')
@@ -53,20 +52,16 @@ export default function ReportsCityPage() {
               // Теперь в токене cities - это массив
               userCity = payload.cities && payload.cities.length > 0 ? payload.cities[0] : 'all'
             } else {
-              console.warn('Неверная кодировка payload в токене')
               userCity = 'all'
             }
           } else {
-            console.warn('Неверный формат токена')
             userCity = 'all'
           }
         } catch (error) {
-          console.error('Ошибка декодирования токена:', error)
           userCity = 'all'
         }
       }
       
-      console.log('🏙️ Город пользователя:', userCity)
       setUserCity(userCity)
       
       let apiUrl = `${config.apiUrl}/api/reports/city?city=${userCity}`
@@ -89,13 +84,11 @@ export default function ReportsCityPage() {
 
       if (response.ok) {
         const data = await response.json()
-        console.log('📊 Получены данные отчета:', data)
         setReports(data || [])
       } else {
         throw new Error(`Ошибка загрузки отчета: ${response.status}`)
       }
     } catch (error) {
-      console.error("❌ Ошибка загрузки отчета по городам:", error)
       // Fallback к тестовым данным
       const mockReports: CityReport[] = [
         {
@@ -135,7 +128,6 @@ export default function ReportsCityPage() {
           netIncome: 20880
         }
       ]
-      console.log('🔄 Используем тестовые данные отчета')
       setReports(mockReports)
     } finally {
       setLoading(false)

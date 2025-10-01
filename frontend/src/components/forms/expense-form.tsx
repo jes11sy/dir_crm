@@ -91,7 +91,6 @@ export function ExpenseForm({ isOpen, onClose, onSubmit, loading = false, direct
       
       // Если есть файл, загружаем его в S3
       if (receiptFile) {
-        console.log('📤 Загружаем файл в S3:', receiptFile.name)
         
         const uploadFormData = new FormData()
         uploadFormData.append('document', receiptFile)
@@ -110,7 +109,6 @@ export function ExpenseForm({ isOpen, onClose, onSubmit, loading = false, direct
         }
 
         const uploadData = await uploadResponse.json()
-        console.log('✅ Файл загружен в S3:', uploadData)
         
         // Сохраняем URL файла из S3
         fileUrl = uploadData.url
@@ -123,11 +121,9 @@ export function ExpenseForm({ isOpen, onClose, onSubmit, loading = false, direct
       }
       
       await onSubmit(submitData)
-      console.log('✅ Расход успешно создан')
       
       // Сброс формы (будет выполнен в handleClose)
     } catch (error) {
-      console.error('❌ Ошибка создания расхода:', error)
       alert('Ошибка создания расхода. Попробуйте еще раз.')
     }
   }

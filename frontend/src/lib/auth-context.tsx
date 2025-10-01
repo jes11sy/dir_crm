@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(savedToken)
         setUser(parsedUser)
       } catch (error) {
-        console.error('Ошибка парсинга сохраненных данных:', error)
         localStorage.removeItem('token')
         localStorage.removeItem('user')
       }

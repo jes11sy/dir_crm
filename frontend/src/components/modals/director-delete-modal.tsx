@@ -49,7 +49,6 @@ export function DirectorDeleteModal({ isOpen, director, onClose, onSuccess }: Di
         setError(result.message || 'Ошибка удаления директора')
       }
     } catch (error) {
-      console.error('Ошибка удаления директора:', error)
       setError('Ошибка подключения к серверу')
     } finally {
       setIsDeleting(false)

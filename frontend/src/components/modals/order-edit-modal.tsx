@@ -202,7 +202,6 @@ export default function OrderEditModal({ order, masters, isOpen, onClose, onSave
         handleInputChange('expenditureDoc', data.url)
       }
     } catch (error) {
-      console.error('Ошибка загрузки файла:', error)
       alert('Ошибка загрузки файла. Попробуйте еще раз.')
 
       // Очистка файла при ошибке

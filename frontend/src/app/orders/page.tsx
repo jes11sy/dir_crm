@@ -76,7 +76,6 @@ export default function OrdersPage() {
 
   const loadOrders = async (page: number = 1) => {
     try {
-      console.log('🔄 Загружаем заказы...')
       
       // Строим URL с параметрами фильтрации
       const params = new URLSearchParams({
@@ -97,18 +96,15 @@ export default function OrdersPage() {
         }
       })
       
-      console.log('📡 Ответ сервера:', response.status, response.statusText)
       
       if (!response.ok) {
         throw new Error(`Ошибка загрузки заказов: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log('📦 Данные заказов:', data)
       setOrders(data.orders || [])
       setPagination(data.pagination || { page: 1, limit: 10, total: 0, pages: 0 })
     } catch (error) {
-      console.error("❌ Ошибка загрузки заказов:", error)
       // Fallback к тестовым данным
       const mockOrders: Order[] = [
         {
@@ -149,7 +145,6 @@ export default function OrdersPage() {
           result: null
         }
       ]
-      console.log('🔄 Используем тестовые данные')
       setOrders(mockOrders)
     } finally {
       setLoading(false)
@@ -158,7 +153,6 @@ export default function OrdersPage() {
 
   const loadMasters = async () => {
     try {
-      console.log('🔄 Загружаем мастеров...')
       const response = await fetch(`${config.apiUrl}/api/masters`, {
         method: 'GET',
         headers: {
@@ -167,17 +161,14 @@ export default function OrdersPage() {
         }
       })
       
-      console.log('📡 Ответ сервера (мастера):', response.status, response.statusText)
       
       if (!response.ok) {
         throw new Error(`Ошибка загрузки мастеров: ${response.status}`)
       }
       
       const data = await response.json()
-      console.log('📦 Данные мастеров:', data)
       setMasters(data.masters || [])
     } catch (error) {
-      console.error("❌ Ошибка загрузки мастеров:", error)
       // Fallback к тестовым данным
       const mockMasters: Master[] = [
         {
@@ -193,14 +184,12 @@ export default function OrdersPage() {
           status_work: "работает"
         }
       ]
-      console.log('🔄 Используем тестовые данные мастеров')
       setMasters(mockMasters)
     }
   }
 
   const loadFilterOptions = async () => {
     try {
-      console.log('🔄 Загружаем опции фильтров...')
       const response = await fetch(`${config.apiUrl}/api/orders/filter-options`, {
         method: 'GET',
         headers: {
@@ -211,13 +200,10 @@ export default function OrdersPage() {
       
       if (response.ok) {
         const data = await response.json()
-        console.log('📦 Опции фильтров:', data)
         setFilterOptions(data)
       } else {
-        console.log('⚠️ API фильтров недоступен, используем данные из текущей страницы')
       }
     } catch (error) {
-      console.error("❌ Ошибка загрузки опций фильтров:", error)
     }
   }
 
@@ -236,16 +222,13 @@ export default function OrdersPage() {
       try {
         // Здесь будет API запрос на удаление
         setOrders(orders.filter(order => order.id !== orderId))
-        console.log("Заказ удален:", orderId)
       } catch (error) {
-        console.error("Ошибка удаления заказа:", error)
       }
     }
   }
 
   const handleSaveOrder = async (updatedOrder: Order) => {
     try {
-        console.log("📤 Отправляем данные заказа:", JSON.stringify(updatedOrder, null, 2))
         
         const response = await fetch(`${config.apiUrl}/api/orders/${updatedOrder.id}`, {
         method: 'PUT',
@@ -258,7 +241,6 @@ export default function OrdersPage() {
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error(`❌ Ошибка ${response.status}:`, errorText)
         throw new Error(`Ошибка сохранения заказа: ${response.status}`)
       }
 
@@ -266,9 +248,7 @@ export default function OrdersPage() {
       setOrders(orders.map(order =>
         order.id === updatedOrder.id ? data.order : order
       ))
-      console.log("✅ Заказ сохранен:", data.order)
     } catch (error) {
-      console.error("❌ Ошибка сохранения заказа:", error)
       // Fallback к локальному обновлению
       setOrders(orders.map(order =>
         order.id === updatedOrder.id ? updatedOrder : order
@@ -278,7 +258,6 @@ export default function OrdersPage() {
 
   const handleNewOrder = () => {
     // Здесь будет логика создания нового заказа
-    console.log("Создание нового заказа")
   }
 
   const handlePageChange = (page: number) => {

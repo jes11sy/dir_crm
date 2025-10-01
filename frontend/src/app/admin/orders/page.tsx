@@ -44,7 +44,6 @@ export default function AdminOrdersPage() {
           router.push('/adlogin')
         }
       } catch (error) {
-        console.error('Ошибка проверки токена:', error)
         router.push('/adlogin')
       } finally {
         setIsLoading(false)

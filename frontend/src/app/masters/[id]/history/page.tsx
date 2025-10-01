@@ -53,7 +53,6 @@ export default function MasterHistoryPage() {
 
   const loadMasterData = async () => {
     try {
-      console.log('🔄 Загружаем данные мастера...')
       
       // Загружаем данные мастера
       const masterResponse = await fetch(`${config.apiUrl}/api/masters/${masterId}`, {
@@ -72,7 +71,6 @@ export default function MasterHistoryPage() {
         throw new Error(`Ошибка загрузки мастера: ${masterResponse.status}`)
       }
     } catch (error) {
-      console.error("❌ Ошибка загрузки данных мастера:", error)
       // Fallback к тестовым данным
       const mockMaster: Master = {
         id: Number(masterId),

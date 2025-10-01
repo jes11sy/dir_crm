@@ -125,7 +125,6 @@ export function OrderViewModal({ order, isOpen, onClose, onEdit, onDelete }: Ord
       const data = await response.json()
       setCallRecords(data.calls || [])
     } catch (error) {
-      console.error('Ошибка при загрузке записей звонков:', error)
       setCallRecords([])
     } finally {
       setLoadingRecords(false)
@@ -598,7 +597,6 @@ export function OrderViewModal({ order, isOpen, onClose, onEdit, onDelete }: Ord
                                 src={getAudioUrl(record.recordingPath)}
                                 title={`Звонок #${record.id}`}
                                 onError={(error) => {
-                                  console.error('Ошибка плеера:', error)
                                   setPlayingAudio(null)
                                 }}
                                 className="mb-4"

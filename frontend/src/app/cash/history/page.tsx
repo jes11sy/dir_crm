@@ -28,7 +28,6 @@ export default function CashHistoryPage() {
 
   const loadOperations = async () => {
     try {
-      console.log('🔄 Загружаем историю операций...')
       const response = await fetch(`${config.apiUrl}/api/cash?type=all`, {
         method: 'GET',
         headers: {
@@ -37,17 +36,14 @@ export default function CashHistoryPage() {
         }
       })
 
-      console.log('📡 Ответ сервера (операции):', response.status, response.statusText)
 
       if (!response.ok) {
         throw new Error(`Ошибка загрузки операций: ${response.status}`)
       }
 
       const data = await response.json()
-      console.log('📦 Данные операций:', data)
       setOperations(data.operations || [])
     } catch (error) {
-      console.error("❌ Ошибка загрузки операций:", error)
       // Fallback к тестовым данным
       const mockOperations: CashOperation[] = [
         {
@@ -83,7 +79,6 @@ export default function CashHistoryPage() {
           dateCreate: "2024-01-14T14:30:00Z"
         }
       ]
-      console.log('🔄 Используем тестовые данные операций')
       setOperations(mockOperations)
     } finally {
       setLoading(false)
@@ -91,7 +86,6 @@ export default function CashHistoryPage() {
   }
 
   const handleExport = () => {
-    console.log("Экспорт истории операций")
     // Здесь будет логика экспорта
   }
 

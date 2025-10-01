@@ -30,7 +30,6 @@ export default function ReportsMastersPage() {
 
   const loadMastersReports = async () => {
     try {
-      console.log('🔄 Загружаем отчет по мастерам...')
       
       // Получаем город директора из токена
       const token = localStorage.getItem('token')
@@ -48,20 +47,16 @@ export default function ReportsMastersPage() {
               // Теперь в токене cities - это массив
               userCity = payload.cities && payload.cities.length > 0 ? payload.cities[0] : 'all'
             } else {
-              console.warn('Неверная кодировка payload в токене')
               userCity = 'all'
             }
           } else {
-            console.warn('Неверный формат токена')
             userCity = 'all'
           }
         } catch (error) {
-          console.error('Ошибка декодирования токена:', error)
           userCity = 'all'
         }
       }
       
-      console.log('🏙️ Город пользователя:', userCity)
       setUserCity(userCity)
       
       const response = await fetch(`${config.apiUrl}/api/reports/masters?city=${userCity}`, {
@@ -74,13 +69,11 @@ export default function ReportsMastersPage() {
 
       if (response.ok) {
         const data = await response.json()
-        console.log('📊 Получены данные отчета по мастерам:', data)
         setReports(data || [])
       } else {
         throw new Error(`Ошибка загрузки отчета: ${response.status}`)
       }
     } catch (error) {
-      console.error("❌ Ошибка загрузки отчета по мастерам:", error)
       // Fallback к тестовым данным
       const mockReports: MasterReport[] = [
         {
@@ -129,7 +122,6 @@ export default function ReportsMastersPage() {
           salary: 18000
         }
       ]
-      console.log('🔄 Используем тестовые данные отчета')
       setReports(mockReports)
     } finally {
       setLoading(false)
@@ -138,7 +130,6 @@ export default function ReportsMastersPage() {
 
 
   const handleExport = () => {
-    console.log("Экспорт отчета по мастерам")
     // Здесь будет логика экспорта
   }
 
