@@ -81,8 +81,35 @@ backup_database() {
 # Остановка сервисов
 stop_services() {
     log_info "🛑 Остановка сервисов..."
-    docker-compose -f docker-compose.prod.yml down
-    log_success "Сервисы остановлены"
+    
+    # Останавливаем через docker-compose
+    docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
+    docker compose -f docker-compose.prod.yml down 2>/dev/null || true
+    
+    # Принудительная остановка контейнеров
+    log_info "🛑 Принудительная остановка CRM контейнеров..."
+    docker stop crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
+    docker rm crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
+    
+    # Очистка контейнеров
+    log_info "🧹 Очистка старых контейнеров..."
+    docker container prune -f
+    docker network prune -f
+    
+    # Проверка и освобождение портов
+    log_info "🔍 Проверка портов 80 и 443..."
+    if command -v lsof &> /dev/null; then
+        if lsof -Pi :80 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            log_warning "Порт 80 занят, освобождаем..."
+            fuser -k 80/tcp 2>/dev/null || true
+        fi
+        if lsof -Pi :443 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            log_warning "Порт 443 занят, освобождаем..."
+            fuser -k 443/tcp 2>/dev/null || true
+        fi
+    fi
+    
+    log_success "Сервисы остановлены и порты освобождены"
 }
 
 # Сборка образов

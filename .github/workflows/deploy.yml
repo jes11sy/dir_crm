@@ -156,12 +156,33 @@ jobs:
             
             # Остановка всех сервисов (если есть)
             echo "🛑 Stopping services..."
-            docker compose down 2>/dev/null || true
+            docker compose -f docker-compose.prod.yml down 2>/dev/null || true
+            docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
+            
+            # Принудительная остановка контейнеров с этими именами
+            echo "🛑 Force stopping CRM containers..."
+            docker stop crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
+            docker rm crm-nginx crm-backend crm-frontend crm-redis 2>/dev/null || true
             
             # Безопасная очистка Docker (БЕЗ volumes!)
             echo "🧹 Cleaning Docker cache (preserving volumes)..."
+            docker container prune -f
+            docker image prune -f
+            docker network prune -f
             docker system prune -af
             docker builder prune -af
+            
+            # Проверка и освобождение портов 80 и 443
+            echo "🔍 Checking ports 80 and 443..."
+            if lsof -Pi :80 -sTCP:LISTEN -t >/dev/null 2>&1; then
+              echo "⚠️ Port 80 is in use, attempting to free..."
+              fuser -k 80/tcp 2>/dev/null || true
+            fi
+            if lsof -Pi :443 -sTCP:LISTEN -t >/dev/null 2>&1; then
+              echo "⚠️ Port 443 is in use, attempting to free..."
+              fuser -k 443/tcp 2>/dev/null || true
+            fi
+            echo "✅ Ports are ready"
             
             # Логин в GitHub Container Registry
             echo "🔐 Logging into GitHub Container Registry..."
