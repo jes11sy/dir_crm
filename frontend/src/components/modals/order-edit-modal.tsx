@@ -489,7 +489,7 @@ export default function OrderEditModal({ order, masters, isOpen, onClose, onSave
                     <SelectTrigger>
                       <SelectValue placeholder="Выберите мастера" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[300px] overflow-y-auto">
                       <SelectItem value="none">Не назначен</SelectItem>
                       {availableMasters.map(master => (
                         <SelectItem key={master.id} value={master.id.toString()}>
