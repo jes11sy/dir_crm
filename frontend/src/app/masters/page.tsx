@@ -42,10 +42,14 @@ export default function MastersPage() {
   // Загрузка данных
   useEffect(() => {
     loadMasters()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.city, filters.status]) // Перезагружаем при изменении фильтров
 
   const loadMasters = async () => {
+    setLoading(true)
     try {
+      console.log('🔍 Загружаем мастеров с фильтрами:', filters)
+      
       // Загружаем ВСЕ мастера сразу (без пагинации на сервере)
       const params = new URLSearchParams({
         page: '1',
@@ -56,23 +60,29 @@ export default function MastersPage() {
       if (filters.city !== 'all') params.append('city', filters.city)
       if (filters.status !== 'all') params.append('status_work', filters.status)
       
+      console.log('📡 URL запроса:', `${config.apiUrl}/api/masters?${params.toString()}`)
+      
       const response = await fetch(`${config.apiUrl}/api/masters?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       })
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Ошибка от сервера:', response.status, errorText)
         throw new Error(`Ошибка загрузки мастеров: ${response.status}`)
       }
 
       const data = await response.json()
-      console.log('🔄 Загружено мастеров с сервера:', data.masters.length, data.masters.map(m => ({ id: m.id, name: m.name, tgId: m.tgId })))
+      console.log('📦 Полный ответ от сервера:', data)
+      console.log('🔄 Загружено мастеров:', data.masters?.length || 0)
+      if (data.masters && data.masters.length > 0) {
+        console.log('👥 Первые 3 мастера:', data.masters.slice(0, 3).map(m => ({ id: m.id, name: m.name, tgId: m.tgId, cities: m.cities })))
+      }
+      
       setMasters(data.masters || [])
       setCurrentPage(1) // Сбрасываем на первую страницу
     } catch (error) {
@@ -221,8 +231,7 @@ export default function MastersPage() {
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters)
-    setLoading(true)
-    loadMasters() // Перезагружаем с новыми фильтрами
+    // loadMasters вызовется автоматически через useEffect
   }
 
   // Статистика
