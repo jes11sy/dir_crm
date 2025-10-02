@@ -128,8 +128,9 @@ export function MasterEditModal({ master, isOpen, onClose, onSave }: MasterEditM
         tgId: formData.tgId || undefined, // Явно добавляем tgId
         chatId: formData.chatId || undefined, // Явно добавляем chatId
       } as Master
+      console.log('💾 Отправляем мастера на сохранение:', updatedMaster)
       onSave(updatedMaster)
-      onClose()
+      // НЕ закрываем модалку здесь - это делается в родительском компоненте после успешного сохранения
     }
   }
 

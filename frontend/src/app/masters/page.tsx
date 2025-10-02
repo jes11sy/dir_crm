@@ -49,7 +49,8 @@ export default function MastersPage() {
       // Загружаем ВСЕ мастера сразу (без пагинации на сервере)
       const params = new URLSearchParams({
         page: '1',
-        limit: '999999' // Очень большое число чтобы получить всех мастеров
+        limit: '999999', // Очень большое число чтобы получить всех мастеров
+        _t: Date.now().toString() // Добавляем timestamp для предотвращения кэширования
       })
       
       if (filters.city !== 'all') params.append('city', filters.city)
@@ -59,7 +60,10 @@ export default function MastersPage() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
       })
 
@@ -68,6 +72,7 @@ export default function MastersPage() {
       }
 
       const data = await response.json()
+      console.log('🔄 Загружено мастеров с сервера:', data.masters.length, data.masters.map(m => ({ id: m.id, name: m.name, tgId: m.tgId })))
       setMasters(data.masters || [])
       setCurrentPage(1) // Сбрасываем на первую страницу
     } catch (error) {
@@ -146,6 +151,7 @@ export default function MastersPage() {
     try {
       if (updatedMaster.id) {
         // Редактирование существующего
+        console.log('📝 Сохраняем мастера:', updatedMaster)
         const response = await fetch(`${config.apiUrl}/api/masters/${updatedMaster.id}`, {
           method: 'PUT',
           headers: {
@@ -156,11 +162,21 @@ export default function MastersPage() {
         })
 
         if (!response.ok) {
+          const errorText = await response.text()
+          console.error('❌ Ошибка от сервера:', errorText)
           throw new Error(`Ошибка обновления мастера: ${response.status}`)
         }
 
-        // Перезагружаем весь список мастеров после обновления
-        await loadMasters()
+        const result = await response.json()
+        console.log('✅ Мастер обновлен на сервере:', result.master)
+        
+        // Закрываем модалку
+        setIsEditModalOpen(false)
+        
+        // Небольшая задержка и перезагружаем весь список мастеров после обновления
+        setTimeout(async () => {
+          await loadMasters()
+        }, 100)
       } else {
         // Добавление нового
         const response = await fetch(`${config.apiUrl}/api/masters`, {
@@ -176,8 +192,13 @@ export default function MastersPage() {
           throw new Error(`Ошибка создания мастера: ${response.status}`)
         }
 
+        // Закрываем модалку
+        setIsEditModalOpen(false)
+        
         // Перезагружаем весь список мастеров после создания
-        await loadMasters()
+        setTimeout(async () => {
+          await loadMasters()
+        }, 100)
       }
     } catch (error) {
       console.error('Ошибка сохранения мастера:', error)
