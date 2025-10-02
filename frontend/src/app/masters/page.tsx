@@ -30,29 +30,26 @@ export default function MastersPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    pages: 0
-  })
+  const [currentPage, setCurrentPage] = useState(1)
   const [filters, setFilters] = useState({
     search: '',
     city: 'all',
     status: 'all'
   })
+  
+  const itemsPerPage = 10
 
   // Загрузка данных
   useEffect(() => {
     loadMasters()
   }, [])
 
-  const loadMasters = async (page: number = 1) => {
+  const loadMasters = async () => {
     try {
-      // Строим URL с параметрами
+      // Загружаем ВСЕ мастера сразу (без пагинации на сервере)
       const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '10'
+        page: '1',
+        limit: '999999' // Очень большое число чтобы получить всех мастеров
       })
       
       if (filters.city !== 'all') params.append('city', filters.city)
@@ -66,21 +63,21 @@ export default function MastersPage() {
         }
       })
 
-
       if (!response.ok) {
         throw new Error(`Ошибка загрузки мастеров: ${response.status}`)
       }
 
       const data = await response.json()
       setMasters(data.masters || [])
-      setPagination(data.pagination || { page: 1, limit: 10, total: 0, pages: 0 })
+      setCurrentPage(1) // Сбрасываем на первую страницу
     } catch (error) {
+      console.error('Ошибка загрузки мастеров:', error)
       // Fallback к тестовым данным
       const mockMasters: Master[] = [
         {
           id: 1,
           name: "Алексей Мастеров",
-          city: ["СПб"],
+          cities: ["СПб"],
           statusWork: "работает",
           dateCreate: "2024-01-01T00:00:00Z",
           passportDoc: "passport_001.pdf",
@@ -90,7 +87,7 @@ export default function MastersPage() {
         {
           id: 2,
           name: "Петр Ремонтников",
-          city: ["Москва", "СПб"],
+          cities: ["Москва", "СПб"],
           statusWork: "работает",
           dateCreate: "2024-01-02T00:00:00Z",
           passportDoc: "passport_002.pdf",
@@ -99,7 +96,7 @@ export default function MastersPage() {
         {
           id: 3,
           name: "Иван Уволенов",
-          city: ["Казань"],
+          cities: ["Казань"],
           statusWork: "уволен",
           dateCreate: "2023-12-01T00:00:00Z",
           note: "Уволен за нарушение дисциплины"
@@ -136,10 +133,11 @@ export default function MastersPage() {
           throw new Error(`Ошибка удаления мастера: ${response.status}`)
         }
 
-        setMasters(masters.filter(master => master.id !== masterId))
+        // Перезагружаем весь список после удаления
+        await loadMasters()
       } catch (error) {
-        // Fallback к локальному удалению
-        setMasters(masters.filter(master => master.id !== masterId))
+        console.error('Ошибка удаления мастера:', error)
+        alert('Ошибка при удалении мастера. Попробуйте еще раз.')
       }
     }
   }
@@ -161,10 +159,8 @@ export default function MastersPage() {
           throw new Error(`Ошибка обновления мастера: ${response.status}`)
         }
 
-        const data = await response.json()
-        setMasters(masters.map(master =>
-          master.id === updatedMaster.id ? data.master : master
-        ))
+        // Перезагружаем весь список мастеров после обновления
+        await loadMasters()
       } else {
         // Добавление нового
         const response = await fetch(`${config.apiUrl}/api/masters`, {
@@ -180,19 +176,12 @@ export default function MastersPage() {
           throw new Error(`Ошибка создания мастера: ${response.status}`)
         }
 
-        const data = await response.json()
-        setMasters([...masters, data.master])
+        // Перезагружаем весь список мастеров после создания
+        await loadMasters()
       }
     } catch (error) {
-      // Fallback к локальному обновлению
-      if (updatedMaster.id) {
-        setMasters(masters.map(master =>
-          master.id === updatedMaster.id ? updatedMaster : master
-        ))
-      } else {
-        const newMaster = { ...updatedMaster, id: Date.now() }
-        setMasters([...masters, newMaster])
-      }
+      console.error('Ошибка сохранения мастера:', error)
+      alert('Ошибка при сохранении мастера. Попробуйте еще раз.')
     }
   }
 
@@ -206,20 +195,32 @@ export default function MastersPage() {
   }
 
   const handlePageChange = (page: number) => {
-    setLoading(true)
-    loadMasters(page)
+    setCurrentPage(page)
   }
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters)
     setLoading(true)
-    loadMasters(1) // Сбрасываем на первую страницу при изменении фильтров
+    loadMasters() // Перезагружаем с новыми фильтрами
   }
 
-  // Статистика (используем данные из пагинации для точности)
-  const totalMasters = pagination.total
+  // Статистика
+  const totalMasters = masters.length
   const activeMasters = masters.filter(master => master.statusWork === "работает").length
   const inactiveMasters = masters.filter(master => master.statusWork !== "работает").length
+  
+  // Вычисляем пагинацию на фронтенде
+  const totalPages = Math.ceil(totalMasters / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentMasters = masters.slice(startIndex, endIndex)
+  
+  const frontendPagination = {
+    page: currentPage,
+    limit: itemsPerPage,
+    total: totalMasters,
+    pages: totalPages
+  }
   
 
   if (loading) {
@@ -299,12 +300,13 @@ export default function MastersPage() {
               </CardHeader>
               <CardContent>
                 <MastersTable
-                  masters={masters}
+                  masters={currentMasters}
+                  allMasters={masters}
                   onEdit={handleEditMaster}
                   onView={handleViewMaster}
                   onDelete={handleDeleteMaster}
                   onHistory={handleHistoryMaster}
-                  pagination={pagination}
+                  pagination={frontendPagination}
                   onPageChange={handlePageChange}
                   filters={filters}
                   onFilterChange={handleFilterChange}

@@ -53,6 +53,7 @@ interface Master {
 
 interface MastersTableProps {
   masters: Master[]
+  allMasters?: Master[] // Все мастера для фильтрации
   onEdit?: (master: Master) => void
   onDelete?: (masterId: number) => void
   onView?: (master: Master) => void
@@ -74,20 +75,21 @@ interface MastersTableProps {
   onFilterChange?: (filters: any) => void
 }
 
-export function MastersTable({ masters, onEdit, onDelete, onView, onHistory, isLoading = false, error, pagination, onPageChange, filters, onFilterChange }: MastersTableProps) {
+export function MastersTable({ masters, allMasters, onEdit, onDelete, onView, onHistory, isLoading = false, error, pagination, onPageChange, filters, onFilterChange }: MastersTableProps) {
   const [searchTerm, setSearchTerm] = useState(filters?.search || "")
   const [cityFilter, setCityFilter] = useState(filters?.city || "all")
   const [statusFilter, setStatusFilter] = useState(filters?.status || "all")
 
-  // Получаем уникальные значения для фильтров
-  const cities = Array.from(new Set(masters.flatMap(master => {
+  // Получаем уникальные значения для фильтров из всех мастеров
+  const mastersForFilters = allMasters || masters
+  const cities = Array.from(new Set(mastersForFilters.flatMap(master => {
     // Проверяем, есть ли поле cities (новый формат) или city (старый формат)
     const masterCities = (master as any).cities || master.city
     return Array.isArray(masterCities) ? masterCities : [masterCities]
   })))
   const statuses = ["работает", "уволен", "в отпуске", "больничный"]
 
-  // Фильтрация на сервере, поэтому просто используем masters
+  // Используем переданные мастера (уже отфильтрованные и отпагинированные на фронтенде)
   const filteredMasters = masters
 
   const getStatusColor = (status: string) => {
